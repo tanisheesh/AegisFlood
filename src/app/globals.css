@@ -10,13 +10,13 @@
   --dim: #4a4843;
   --border: #222220;
   --border-hi: #3a3834;
-  --signal: #00e5ff;
-  --signal-dim: rgba(0, 229, 255, 0.14);
+  --signal: #ff4d00;
+  --signal-dim: rgba(255, 77, 0, 0.14);
   --amber: #ffb300;
   --ok: #00e676;
   --warn: #ff5500;
   --danger: #ff2a2a;
-  --cyan: #00e5ff;
+  --cyan: #ff4d00;
 
   --font-display: 'Barlow Condensed', Impact, sans-serif;
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
@@ -106,7 +106,7 @@ body {
 }
 
 .brutal-btn-primary:hover {
-  background: #33ebff;
+  background: #ff6624;
   box-shadow: 4px 4px 0px var(--ink);
   border-color: var(--ink);
 }
@@ -158,5 +158,5 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00e5ff;
+  background: #ff4d00;
 }

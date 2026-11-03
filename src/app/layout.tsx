@@ -101,7 +101,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen overflow-x-hidden antialiased selection:bg-[#00e5ff] selection:text-black">
+      <body className="min-h-screen overflow-x-hidden antialiased selection:bg-[#ff4d00] selection:text-black">
         {children}
       </body>
     </html>

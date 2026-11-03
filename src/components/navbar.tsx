@@ -16,12 +16,12 @@ export function AegisFloodLogo() {
       aria-hidden="true"
     >
       <rect width="64" height="64" fill="#080808" />
-      <rect x="3" y="3" width="58" height="58" stroke="#00E5FF" strokeWidth="4" />
+      <rect x="3" y="3" width="58" height="58" stroke="#FF4D00" strokeWidth="4" />
       <circle cx="32" cy="18" r="5" fill="#FFB300" />
       <path d="M22 25 L32 18 L42 25" stroke="#FFB300" strokeWidth="2.5" />
       <path
         d="M10 37 C17 31, 25 43, 32 37 C39 31, 47 43, 54 37"
-        stroke="#00E5FF"
+        stroke="#FF4D00"
         strokeWidth="4"
         fill="none"
       />
@@ -53,7 +53,7 @@ export default function Navbar() {
           <AegisFloodLogo />
           <div className="flex items-baseline gap-2 truncate">
             <span className="font-display font-black text-xl sm:text-2xl tracking-tight text-[#f2efe9]">
-              AEGIS<span className="text-[#00e5ff]">FLOOD</span>
+              AEGIS<span className="text-[#ff4d00]">FLOOD</span>
             </span>
             <span className="hidden xl:inline font-mono text-[10px] text-[#88857e] tracking-widest">
               SYS.REV.2.4 // ESP32-S3+KALMAN+LORAWAN+DIJKSTRA
@@ -71,7 +71,7 @@ export default function Navbar() {
                 href={item.href}
                 className={`h-14 px-3.5 lg:px-5 flex items-center gap-2 font-mono text-[11px] lg:text-xs tracking-wider border-l border-[#222220] last:border-r transition-colors whitespace-nowrap ${
                   active
-                    ? "bg-[#151515] text-[#00e5ff] border-b-2 border-b-[#00e5ff]"
+                    ? "bg-[#151515] text-[#ff4d00] border-b-2 border-b-[#ff4d00]"
                     : "text-[#88857e] hover:text-[#f2efe9] hover:bg-[#0e0e0e]"
                 }`}
               >
@@ -123,7 +123,7 @@ export default function Navbar() {
               href={item.href}
               className={`py-2.5 px-1 text-center font-mono text-[10px] tracking-wider border-r border-[#222220] last:border-r-0 truncate ${
                 active
-                  ? "text-[#00e5ff] bg-[#151515] font-bold border-b-2 border-b-[#00e5ff]"
+                  ? "text-[#ff4d00] bg-[#151515] font-bold border-b-2 border-b-[#ff4d00]"
                   : "text-[#88857e]"
               }`}
             >

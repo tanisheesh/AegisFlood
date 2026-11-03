@@ -103,7 +103,7 @@ export default function HowItWorksPage() {
       <main className="flex-1 max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
         {/* Page Header */}
         <div className="border border-[#222220] bg-[#0e0e0e] p-5 sm:p-8 lg:p-10">
-          <div className="font-mono text-[11px] sm:text-xs text-[#00e5ff] uppercase tracking-widest mb-2">
+          <div className="font-mono text-[11px] sm:text-xs text-[#ff4d00] uppercase tracking-widest mb-2">
             // HYDROLOGICAL PHYSICS, KALMAN ESTIMATION &amp; GRAPH ROUTING SPECIFICATION
           </div>
           <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase text-[#f2efe9]">
@@ -120,14 +120,14 @@ export default function HowItWorksPage() {
         <section className="border border-[#222220] bg-[#0e0e0e]">
           <div className="panel-header">
             <span>GOVERNING MATHEMATICAL LAWS // 5 EQUATIONS DRIVING THE DIGITAL TWIN</span>
-            <span className="text-[#00e5ff]">REALTIME SOLVER</span>
+            <span className="text-[#ff4d00]">REALTIME SOLVER</span>
           </div>
 
           <div className="divide-y divide-[#222220]">
             {MATHEMATICAL_LAWS.map((law) => (
               <div key={law.code} className="p-5 sm:p-6 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
-                  <span className="text-[#00e5ff] font-bold">{law.code}</span>
+                  <span className="text-[#ff4d00] font-bold">{law.code}</span>
                   <span className="text-[#f2efe9] font-bold">{law.title}</span>
                 </div>
                 <div className="p-3.5 bg-[#080808] border border-[#222220] font-mono text-xs sm:text-sm text-[#00e676] overflow-x-auto custom-scrollbar">

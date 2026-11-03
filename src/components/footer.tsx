@@ -16,12 +16,12 @@ export default function Footer() {
             aria-hidden="true"
           >
             <rect width="64" height="64" fill="#080808" />
-            <rect x="3" y="3" width="58" height="58" stroke="#00E5FF" strokeWidth="4" />
+            <rect x="3" y="3" width="58" height="58" stroke="#FF4D00" strokeWidth="4" />
             <circle cx="32" cy="18" r="5" fill="#FFB300" />
             <path d="M22 25 L32 18 L42 25" stroke="#FFB300" strokeWidth="2.5" />
             <path
               d="M10 37 C17 31, 25 43, 32 37 C39 31, 47 43, 54 37"
-              stroke="#00E5FF"
+              stroke="#FF4D00"
               strokeWidth="4"
               fill="none"
             />
@@ -42,7 +42,7 @@ export default function Footer() {
                 href="https://tanisheesh.in"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#f2efe9] hover:text-[#00e5ff] underline underline-offset-2"
+                className="text-[#f2efe9] hover:text-[#ff4d00] underline underline-offset-2"
               >
                 Tanish Poddar
               </a>{" "}
@@ -52,23 +52,23 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] sm:text-[11px] uppercase tracking-wider">
-          <Link href="/" className="hover:text-[#00e5ff] transition">
+          <Link href="/" className="hover:text-[#ff4d00] transition">
             [01] Spec
           </Link>
-          <Link href="/playground" className="hover:text-[#00e5ff] transition">
+          <Link href="/playground" className="hover:text-[#ff4d00] transition">
             [02] Digital Twin
           </Link>
-          <Link href="/network" className="hover:text-[#00e5ff] transition">
+          <Link href="/network" className="hover:text-[#ff4d00] transition">
             [03] Node Topology
           </Link>
-          <Link href="/how-it-works" className="hover:text-[#00e5ff] transition">
+          <Link href="/how-it-works" className="hover:text-[#ff4d00] transition">
             [04] Hydrology &amp; Math
           </Link>
           <a
             href="https://github.com/tanisheesh/AegisFlood"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#f2efe9] hover:text-[#00e5ff] transition"
+            className="text-[#f2efe9] hover:text-[#ff4d00] transition"
           >
             GitHub ↗
           </a>

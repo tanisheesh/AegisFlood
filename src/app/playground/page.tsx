@@ -660,7 +660,7 @@ export default function PlaygroundPage() {
               >
                 ● BACKHAUL: {cellularDown ? "865MHz LORA P2P MESH" : "4G-LTE MQTT TLS"}
               </span>
-              <span className="text-[#00e5ff] font-bold">
+              <span className="text-[#ff4d00] font-bold">
                 TICK #{tickRef.current} ({simSpeed}x)
               </span>
             </div>
@@ -682,8 +682,8 @@ export default function PlaygroundPage() {
                   onClick={() => applyScenario(sc.id)}
                   className={`px-2.5 py-1.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider border cursor-pointer transition ${
                     scenarioId === sc.id
-                      ? "bg-[#00e5ff] text-[#080808] border-[#00e5ff] font-bold"
-                      : "bg-[#111111] text-[#f2efe9] border-[#222220] hover:border-[#00e5ff]"
+                      ? "bg-[#ff4d00] text-[#080808] border-[#ff4d00] font-bold"
+                      : "bg-[#111111] text-[#f2efe9] border-[#222220] hover:border-[#ff4d00]"
                   }`}
                 >
                   {sc.label}
@@ -695,7 +695,7 @@ export default function PlaygroundPage() {
             <div className="flex items-center gap-1.5 font-mono text-[11px]">
               <button
                 onClick={() => setIsRunning(!isRunning)}
-                className="px-3 py-1.5 border border-[#3a3834] bg-[#151515] text-[#f2efe9] hover:border-[#00e5ff] cursor-pointer font-bold"
+                className="px-3 py-1.5 border border-[#3a3834] bg-[#151515] text-[#f2efe9] hover:border-[#ff4d00] cursor-pointer font-bold"
               >
                 {isRunning ? "⏸ PAUSE" : "▶ RESUME"}
               </button>
@@ -732,7 +732,7 @@ export default function PlaygroundPage() {
               <button
                 onClick={() => setShowInundation(!showInundation)}
                 className={`cursor-pointer ${
-                  showInundation ? "text-[#00e5ff] font-bold" : "text-[#4a4843]"
+                  showInundation ? "text-[#ff4d00] font-bold" : "text-[#4a4843]"
                 }`}
               >
                 [{showInundation ? "×" : " "}] FLOOD INUNDATION RADII
@@ -756,7 +756,7 @@ export default function PlaygroundPage() {
             </div>
             <div className="text-[#88857e]">
               SELECTED STATION:{" "}
-              <strong className="text-[#00e5ff]">
+              <strong className="text-[#ff4d00]">
                 {activeNode.id} ({activeNode.name})
               </strong>
             </div>
@@ -768,15 +768,15 @@ export default function PlaygroundPage() {
           {/* LEFT 8 COLS: INTERACTIVE TACTICAL RIVER BASIN STAGE + OSCILLOSCOPE */}
           <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6 min-w-0">
             {/* 1. Interactive SVG River Basin Digital Twin Canvas */}
-            <div className="border border-[#222220] bg-[#0a0c10] flex flex-col">
+            <div className="border border-[#222220] bg-[#0c0c0b] flex flex-col">
               <div className="panel-header">
                 <span>
                   RIVER BASIN DIGITAL TWIN // 58.0 KM KINEMATIC WAVE &amp; DIJKSTRA TOPOLOGY
                 </span>
-                <span className="text-[#00e5ff]">CLICK ANY NODE [N01–N05] TO INSPECT</span>
+                <span className="text-[#ff4d00]">CLICK ANY NODE [N01–N05] TO INSPECT</span>
               </div>
 
-              <div className="relative w-full aspect-[1000/540] bg-[#07090d] overflow-hidden">
+              <div className="relative w-full aspect-[1000/540] bg-[#080808] overflow-hidden">
                 <svg
                   viewBox="0 0 1000 540"
                   className="w-full h-full select-none"
@@ -792,7 +792,7 @@ export default function PlaygroundPage() {
                       <path
                         d="M 50 0 L 0 0 0 50"
                         fill="none"
-                        stroke="rgba(0, 229, 255, 0.05)"
+                        stroke="rgba(255, 77, 0, 0.05)"
                         strokeWidth="1"
                       />
                     </pattern>
@@ -814,14 +814,14 @@ export default function PlaygroundPage() {
                         y1={0}
                         x2={c.x - 45}
                         y2={540}
-                        stroke="#18202c"
+                        stroke="#222220"
                         strokeWidth="1"
                         strokeDasharray="4 6"
                       />
                       <text
                         x={c.x + 6}
                         y={22}
-                        fill="#4a5568"
+                        fill="#686660"
                         fontSize="10"
                         fontFamily="IBM Plex Mono"
                       >
@@ -834,21 +834,21 @@ export default function PlaygroundPage() {
                   <path
                     d="M 40 65 Q 230 140, 325 185 T 520 265 T 715 350 T 960 475"
                     fill="none"
-                    stroke="rgba(0, 229, 255, 0.12)"
+                    stroke="rgba(255, 77, 0, 0.14)"
                     strokeWidth={28 + Math.min(35, rainMmHr * 0.16 + damReleaseM3s * 0.01)}
                     strokeLinecap="round"
                   />
                   <path
                     d="M 40 65 Q 230 140, 325 185 T 520 265 T 715 350 T 960 475"
                     fill="none"
-                    stroke="#0088cc"
+                    stroke="#262420"
                     strokeWidth="12"
                     strokeLinecap="round"
                   />
                   <path
                     d="M 40 65 Q 230 140, 325 185 T 520 265 T 715 350 T 960 475"
                     fill="none"
-                    stroke="#00e5ff"
+                    stroke="#ff4d00"
                     strokeWidth="3"
                     strokeDasharray="10 14"
                   />
@@ -1048,7 +1048,7 @@ export default function PlaygroundPage() {
                             cy={n.canvasY}
                             r="24"
                             fill="none"
-                            stroke="#00e5ff"
+                            stroke="#ff4d00"
                             strokeWidth="2"
                             strokeDasharray="3 3"
                           />
@@ -1080,7 +1080,7 @@ export default function PlaygroundPage() {
                           width="92"
                           height="28"
                           fill="#0b0d12"
-                          stroke={isSel ? "#00e5ff" : "#222220"}
+                          stroke={isSel ? "#ff4d00" : "#222220"}
                           strokeWidth="1"
                         />
                         <text
@@ -1162,11 +1162,11 @@ export default function PlaygroundPage() {
                       key={n.id}
                       onClick={() => setSelectedNodeId(n.id)}
                       className={`p-2.5 text-left font-mono border-r border-b sm:border-b-0 border-[#222220] last:border-r-0 cursor-pointer transition ${
-                        active ? "bg-[#151515] border-t-2 border-t-[#00e5ff]" : "hover:bg-[#121212]"
+                        active ? "bg-[#151515] border-t-2 border-t-[#ff4d00]" : "hover:bg-[#121212]"
                       }`}
                     >
                       <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-[#00e5ff] font-bold">{n.id}</span>
+                        <span className="text-[#ff4d00] font-bold">{n.id}</span>
                         <span
                           className="px-1 font-bold text-[9px]"
                           style={{ color: statusColorHex(n.status) }}
@@ -1195,13 +1195,13 @@ export default function PlaygroundPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => exportBlackbox("csv")}
-                    className="px-2 py-0.5 border border-[#3a3834] text-[#f2efe9] hover:border-[#00e5ff] cursor-pointer text-[10px]"
+                    className="px-2 py-0.5 border border-[#3a3834] text-[#f2efe9] hover:border-[#ff4d00] cursor-pointer text-[10px]"
                   >
                     ⬇ CSV
                   </button>
                   <button
                     onClick={() => exportBlackbox("json")}
-                    className="px-2 py-0.5 border border-[#3a3834] text-[#f2efe9] hover:border-[#00e5ff] cursor-pointer text-[10px]"
+                    className="px-2 py-0.5 border border-[#3a3834] text-[#f2efe9] hover:border-[#ff4d00] cursor-pointer text-[10px]"
                   >
                     ⬇ JSON
                   </button>
@@ -1220,8 +1220,8 @@ export default function PlaygroundPage() {
                   </div>
                 </div>
                 <div className="p-3 sm:border-r border-b sm:border-b-0 border-[#222220]">
-                  <div className="text-[10px] text-[#00e5ff]">CH2 // 1D KALMAN FILTERED</div>
-                  <div className="text-lg font-bold text-[#00e5ff] mt-0.5">
+                  <div className="text-[10px] text-[#ff4d00]">CH2 // 1D KALMAN FILTERED</div>
+                  <div className="text-lg font-bold text-[#ff4d00] mt-0.5">
                     {activeNode.kalmanLevelM.toFixed(3)} m
                   </div>
                   <div className="text-[10px] text-[#88857e]">
@@ -1328,7 +1328,7 @@ export default function PlaygroundPage() {
                         <path
                           d={buildPath((s) => s.kalmanStageM)}
                           fill="none"
-                          stroke="#00e5ff"
+                          stroke="#ff4d00"
                           strokeWidth="2.8"
                         />
                       </>
@@ -1338,7 +1338,7 @@ export default function PlaygroundPage() {
 
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-[#88857e]">
                   <div className="flex flex-wrap items-center gap-4">
-                    <span className="text-[#00e5ff] font-bold">━━ CH2: 1D KALMAN STAGE (m)</span>
+                    <span className="text-[#ff4d00] font-bold">━━ CH2: 1D KALMAN STAGE (m)</span>
                     <span className="text-[#ff2a2a]">╌╌ CH1: RAW SONAR (WITH NOISE/DEBRIS)</span>
                     <span className="text-[#ffb300]">━━ CH3: +60 MIN AI WAVE FORECAST</span>
                   </div>
@@ -1363,7 +1363,7 @@ export default function PlaygroundPage() {
                     onClick={() => setRightTab(t.id as typeof rightTab)}
                     className={`flex-1 py-2.5 px-2 text-center border-r border-[#222220] last:border-r-0 cursor-pointer uppercase ${
                       rightTab === t.id
-                        ? "bg-[#151515] text-[#00e5ff] font-bold border-b-2 border-b-[#00e5ff]"
+                        ? "bg-[#151515] text-[#ff4d00] font-bold border-b-2 border-b-[#ff4d00]"
                         : "text-[#88857e] hover:text-[#f2efe9]"
                     }`}
                   >
@@ -1378,7 +1378,7 @@ export default function PlaygroundPage() {
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
                       <span className="text-[#88857e]">HEADWATER RAINFALL (mm/hr):</span>
-                      <span className="text-[#00e5ff] font-bold">{rainMmHr} mm/hr</span>
+                      <span className="text-[#ff4d00] font-bold">{rainMmHr} mm/hr</span>
                     </div>
                     <input
                       type="range"
@@ -1387,7 +1387,7 @@ export default function PlaygroundPage() {
                       step="5"
                       value={rainMmHr}
                       onChange={(e) => setRainMmHr(Number(e.target.value))}
-                      className="w-full accent-[#00e5ff] cursor-pointer"
+                      className="w-full accent-[#ff4d00] cursor-pointer"
                     />
                   </div>
 
@@ -1433,7 +1433,7 @@ export default function PlaygroundPage() {
                       className={`w-full p-2.5 text-left border cursor-pointer transition ${
                         cellularDown
                           ? "border-[#ff5500] bg-[#ff5500]/15 text-[#ff5500] font-bold"
-                          : "border-[#222220] bg-[#111111] text-[#f2efe9] hover:border-[#00e5ff]"
+                          : "border-[#222220] bg-[#111111] text-[#f2efe9] hover:border-[#ff4d00]"
                       }`}
                     >
                       {cellularDown
@@ -1447,7 +1447,7 @@ export default function PlaygroundPage() {
               {/* TAB 2: IN-BROWSER ESP32-S3 C++ KALMAN FIRMWARE PATCHER */}
               {rightTab === "patcher" && (
                 <div className="p-4 space-y-3 font-mono text-xs">
-                  <div className="text-[10px] text-[#00e5ff] uppercase">
+                  <div className="text-[10px] text-[#ff4d00] uppercase">
                     LIVE OTA CONSTANTS // ESP32-S3 KALMAN &amp; INNOVATION GATE
                   </div>
 
@@ -1461,7 +1461,7 @@ export default function PlaygroundPage() {
                         max="0.5"
                         value={draftQ}
                         onChange={(e) => setDraftQ(Number(e.target.value))}
-                        className="w-full mt-1 px-2 py-1.5 bg-[#080808] border border-[#222220] text-[#00e5ff]"
+                        className="w-full mt-1 px-2 py-1.5 bg-[#080808] border border-[#222220] text-[#ff4d00]"
                       />
                     </label>
                     <label className="block">
@@ -1473,7 +1473,7 @@ export default function PlaygroundPage() {
                         max="1.0"
                         value={draftR}
                         onChange={(e) => setDraftR(Number(e.target.value))}
-                        className="w-full mt-1 px-2 py-1.5 bg-[#080808] border border-[#222220] text-[#00e5ff]"
+                        className="w-full mt-1 px-2 py-1.5 bg-[#080808] border border-[#222220] text-[#ff4d00]"
                       />
                     </label>
                     <label className="block">
@@ -1558,7 +1558,7 @@ export default function PlaygroundPage() {
                   </button>
 
                   {dispatchStatus && (
-                    <div className="p-2 border border-[#00e5ff] bg-[#00e5ff]/10 text-[#00e5ff] text-[10px]">
+                    <div className="p-2 border border-[#ff4d00] bg-[#ff4d00]/10 text-[#ff4d00] text-[10px]">
                       ✓ {dispatchStatus}
                     </div>
                   )}
@@ -1588,7 +1588,7 @@ export default function PlaygroundPage() {
                         {rt.rerouted ? "REROUTED // BYPASS" : "OPTIMAL PATH"}
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#00e5ff]">
+                    <div className="text-[11px] text-[#ff4d00]">
                       Target: <strong>{rt.shelterName}</strong> ({rt.effectiveCostKm} km-eq)
                     </div>
                     <div className="text-[10px] text-[#88857e]">

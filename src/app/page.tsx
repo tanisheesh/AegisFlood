@@ -117,8 +117,8 @@ export default function LandingPage() {
           {/* Left 7 Cols */}
           <div className="lg:col-span-7 p-5 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[#222220] flex flex-col justify-between min-w-0">
             <div>
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.18em] text-[#00e5ff] mb-4 sm:mb-6">
-                <span className="w-2 h-2 shrink-0 bg-[#00e5ff] inline-block" />
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.18em] text-[#ff4d00] mb-4 sm:mb-6">
+                <span className="w-2 h-2 shrink-0 bg-[#ff4d00] inline-block" />
                 <span>ESP32-S3 // 1D KALMAN GATE // SAINT-VENANT WAVE // SX1276 865MHZ LORA</span>
               </div>
 
@@ -127,7 +127,7 @@ export default function LandingPage() {
                 <br />
                 ALARMS FAIL BEFORE
                 <br />
-                <span className="text-[#00e5ff]">THE WAVE HITS.</span>
+                <span className="text-[#ff4d00]">THE WAVE HITS.</span>
               </h1>
 
               <p className="text-sm sm:text-base lg:text-lg text-[#88857e] max-w-xl leading-relaxed mb-6 sm:mb-8">
@@ -138,7 +138,7 @@ export default function LandingPage() {
                   5-Node River Basin Hydrological Digital Twin
                 </strong>{" "}
                 and distributed early warning system combining{" "}
-                <code className="text-[#00e5ff]">ESP32-S3 1D Kalman filtering</code> (
+                <code className="text-[#ff4d00]">ESP32-S3 1D Kalman filtering</code> (
                 <code className="text-[#00e676]">|r_k| &gt; 3.8σ</code> debris rejection),{" "}
                 <strong className="text-[#f2efe9] font-semibold">
                   1D Saint-Venant kinematic wave forecasting
@@ -180,7 +180,7 @@ export default function LandingPage() {
                     val: 45,
                     metric: "Stage: 3.40m / Danger: 6.40m",
                     state: "HEADWATER",
-                    bar: "bg-[#00e5ff]",
+                    bar: "bg-[#ff4d00]",
                   },
                   {
                     id: "NODE_02 // TAPOVAN_BARRAGE",
@@ -196,7 +196,7 @@ export default function LandingPage() {
                     val: 48,
                     metric: "Kalman Δ: 0.01m · SF9 LoRa",
                     state: "KALMAN_OK",
-                    bar: "bg-[#00e5ff]",
+                    bar: "bg-[#ff4d00]",
                   },
                   {
                     id: "NODE_04 // HARIDWAR_PLAINS",
@@ -229,7 +229,7 @@ export default function LandingPage() {
               </div>
 
               <div className="border border-[#222220] bg-[#080808] p-3 sm:p-3.5 space-y-1">
-                <div className="text-[10px] text-[#00e5ff] uppercase tracking-wider">
+                <div className="text-[10px] text-[#ff4d00] uppercase tracking-wider">
                   1D SAINT-VENANT CONTINUITY &amp; EDGE KALMAN GAIN
                 </div>
                 <div className="text-[#00e676] text-[11px] sm:text-xs overflow-x-auto custom-scrollbar whitespace-nowrap pb-1">
@@ -240,7 +240,7 @@ export default function LandingPage() {
 
             <div className="border-t border-[#222220] px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] sm:text-[11px] text-[#88857e]">
               <span>INNOVATION GATE: |z_k - x̂_k⁻| &gt; 0.45m → R×65</span>
-              <Link href="/playground" className="text-[#00e5ff] hover:underline font-bold">
+              <Link href="/playground" className="text-[#ff4d00] hover:underline font-bold">
                 INJECT CLOUDBURST &amp; DEBRIS LIVE →
               </Link>
             </div>
@@ -279,7 +279,7 @@ export default function LandingPage() {
                 idx >= 2 ? "sm:border-b-0" : "sm:border-b"
               }`}
             >
-              <div className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-[#00e5ff] tracking-tight">
+              <div className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-[#ff4d00] tracking-tight">
                 {m.num}
               </div>
               <div className="font-mono text-xs font-bold text-[#f2efe9] mt-2 tracking-wider">
@@ -294,7 +294,7 @@ export default function LandingPage() {
         <section className="border-x border-b border-[#222220] bg-[#0e0e0e]">
           <div className="panel-header">
             <span>DISTRIBUTED EARLY WARNING ARCHITECTURE // 4-STAGE DETERMINISTIC PIPELINE</span>
-            <span className="text-[#00e5ff]">SENSE → KALMAN FILTER → KINEMATIC FORECAST → DIJKSTRA DISPATCH</span>
+            <span className="text-[#ff4d00]">SENSE → KALMAN FILTER → KINEMATIC FORECAST → DIJKSTRA DISPATCH</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-[#222220]">
@@ -305,7 +305,7 @@ export default function LandingPage() {
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between font-mono text-[10px]">
-                    <span className="px-2 py-0.5 bg-[#00e5ff] text-[#080808] font-bold">
+                    <span className="px-2 py-0.5 bg-[#ff4d00] text-[#080808] font-bold">
                       {st.code}
                     </span>
                     <span className="text-[#00e676]">{st.condition}</span>
@@ -335,7 +335,7 @@ export default function LandingPage() {
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between font-mono text-[10px]">
-                    <span className="text-[#00e5ff] font-bold">
+                    <span className="text-[#ff4d00] font-bold">
                       STEP {String(s.step).padStart(2, "0")} // PHASE {s.phase}
                     </span>
                     <span className="px-1.5 py-0.5 border border-[#3a3834] text-[#f2efe9]">
@@ -361,7 +361,7 @@ export default function LandingPage() {
           <div className="lg:col-span-6 border-b lg:border-b-0 lg:border-r border-[#222220] bg-[#0e0e0e] flex flex-col justify-between">
             <div className="panel-header">
               <span>EDGE SENSING &amp; TELECOM STACK // 6 SUBSYSTEMS</span>
-              <Link href="/network" className="text-[#00e5ff] hover:underline">
+              <Link href="/network" className="text-[#ff4d00] hover:underline">
                 INSPECT SCHEMATIC →
               </Link>
             </div>
@@ -371,7 +371,7 @@ export default function LandingPage() {
                 <div key={m.id} className="p-4 sm:p-5 flex flex-col gap-1.5">
                   <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
                     <span className="text-[#f2efe9] font-bold">
-                      <span className="text-[#00e5ff] mr-2">[{m.code}]</span>
+                      <span className="text-[#ff4d00] mr-2">[{m.code}]</span>
                       {m.name}
                     </span>
                     <span className="text-[10px] text-[#00e676] border border-[#222220] bg-[#080808] px-2 py-0.5">
@@ -404,7 +404,7 @@ export default function LandingPage() {
                     onClick={() => setActiveTab(k)}
                     className={`px-4 py-2.5 font-mono text-[11px] tracking-wider border-r border-[#222220] cursor-pointer whitespace-nowrap ${
                       activeTab === k
-                        ? "bg-[#151515] text-[#00e5ff] font-bold border-b-2 border-b-[#00e5ff]"
+                        ? "bg-[#151515] text-[#ff4d00] font-bold border-b-2 border-b-[#ff4d00]"
                         : "text-[#88857e] hover:text-[#f2efe9]"
                     }`}
                   >
@@ -456,12 +456,12 @@ export default function LandingPage() {
                     key={r.arch}
                     className={
                       r.win
-                        ? "bg-[#00e5ff]/10 text-[#f2efe9] font-bold"
+                        ? "bg-[#ff4d00]/10 text-[#f2efe9] font-bold"
                         : "bg-[#0e0e0e] text-[#88857e]"
                     }
                   >
                     <td className="p-3 sm:p-4 border-r border-[#222220] whitespace-nowrap">
-                      {r.win && <span className="text-[#00e5ff] mr-1.5">★</span>}
+                      {r.win && <span className="text-[#ff4d00] mr-1.5">★</span>}
                       {r.arch}
                     </td>
                     <td className="p-3 sm:p-4 border-r border-[#222220]">{r.sensing}</td>

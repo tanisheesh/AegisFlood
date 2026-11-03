@@ -10,14 +10,14 @@
 
 <p align="center">
   <a href="https://aegisflood.tanisheesh.in">
-    <img src="https://img.shields.io/badge/live_demo-00E5FF-00E5FF?style=flat-square" alt="Live Demo">
+    <img src="https://img.shields.io/badge/live_demo-FF4D00-FF4D00?style=flat-square" alt="Live Demo">
   </a>
   <img src="https://img.shields.io/badge/Next.js-black?style=flat-square&logo=next.js" alt="Next.js">
   <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React">
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Espressif-E7352C?style=flat-square&logo=espressif&logoColor=white" alt="ESP32-S3">
   <img src="https://img.shields.io/badge/C++-00599C?style=flat-square&logo=cplusplus&logoColor=white" alt="C++">
-  <img src="https://img.shields.io/badge/license-GPL--3.0-00E5FF?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-FF4D00?style=flat-square" alt="License">
 </p>
 
 ---

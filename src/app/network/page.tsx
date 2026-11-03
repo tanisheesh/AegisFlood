@@ -108,7 +108,7 @@ export default function NetworkPage() {
         {/* Page Header */}
         <div className="border border-[#222220] bg-[#0e0e0e] p-5 sm:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <div className="font-mono text-[11px] sm:text-xs text-[#00e5ff] uppercase tracking-widest mb-2">
+            <div className="font-mono text-[11px] sm:text-xs text-[#ff4d00] uppercase tracking-widest mb-2">
               // EDGE SENSING NODE ARCHITECTURE, PINOUT &amp; FAULT DIAGNOSIS
             </div>
             <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase text-[#f2efe9]">
@@ -135,13 +135,13 @@ export default function NetworkPage() {
           <div className="lg:col-span-7 border-b lg:border-b-0 lg:border-r border-[#222220] flex flex-col">
             <div className="panel-header">
               <span>EDGE STATION INTERCONNECT SCHEMATIC // STAR GROUND &amp; SPI/ADC BUS</span>
-              <span className="text-[#00e5ff] font-bold">{faultInfo.code}</span>
+              <span className="text-[#ff4d00] font-bold">{faultInfo.code}</span>
             </div>
 
             <div className="p-4 bg-[#080808] flex-1 flex items-center justify-center">
               <svg
                 viewBox="0 0 760 400"
-                className="w-full h-auto max-h-[380px] border border-[#222220] bg-[#0b0d12]"
+                className="w-full h-auto max-h-[380px] border border-[#222220] bg-[#0b0b0a]"
               >
                 {/* Power Subsystem Box */}
                 <rect
@@ -149,7 +149,7 @@ export default function NetworkPage() {
                   y="30"
                   width="195"
                   height="95"
-                  fill="#111318"
+                  fill="#121210"
                   stroke={activeFault === "solar_brownout" ? "#ff2a2a" : "#ffb300"}
                   strokeWidth="2"
                 />
@@ -172,11 +172,11 @@ export default function NetworkPage() {
                   y="110"
                   width="210"
                   height="175"
-                  fill="#0f1722"
-                  stroke="#00e5ff"
+                  fill="#161412"
+                  stroke="#ff4d00"
                   strokeWidth="2.5"
                 />
-                <text x="292" y="138" fill="#00e5ff" fontSize="12" fontWeight="bold" fontFamily="IBM Plex Mono">
+                <text x="292" y="138" fill="#ff4d00" fontSize="12" fontWeight="bold" fontFamily="IBM Plex Mono">
                   MOD_01 // ESP32-S3 EDGE MCU
                 </text>
                 <text x="292" y="158" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
@@ -208,10 +208,10 @@ export default function NetworkPage() {
                   width="195"
                   height="95"
                   fill="#111318"
-                  stroke={activeFault === "debris_echo" ? "#ff2a2a" : "#00e5ff"}
+                  stroke={activeFault === "debris_echo" ? "#ff2a2a" : "#ff4d00"}
                   strokeWidth="2"
                 />
-                <text x="38" y="190" fill="#00e5ff" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
+                <text x="38" y="190" fill="#ff4d00" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
                   MOD_02 // STAGE RADAR/SONAR
                 </text>
                 <text x="38" y="210" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
@@ -273,7 +273,7 @@ export default function NetworkPage() {
                 <text x="548" y="136" fill="#00e676" fontSize="10" fontFamily="IBM Plex Mono">
                   P2P Mesh Failover &lt; 200ms
                 </text>
-                <text x="548" y="154" fill="#00e5ff" fontSize="10" fontFamily="IBM Plex Mono">
+                <text x="548" y="154" fill="#ff4d00" fontSize="10" fontFamily="IBM Plex Mono">
                   ADR SF9 · TDMA Slotted
                 </text>
 
@@ -284,10 +284,10 @@ export default function NetworkPage() {
                   width="200"
                   height="120"
                   fill="#111318"
-                  stroke="#00e5ff"
+                  stroke="#ff4d00"
                   strokeWidth="1.8"
                 />
-                <text x="548" y="245" fill="#00e5ff" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
+                <text x="548" y="245" fill="#ff4d00" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
                   MOD_06 // SIREN &amp; CAP GATEWAY
                 </text>
                 <text x="548" y="265" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
@@ -302,10 +302,10 @@ export default function NetworkPage() {
 
                 {/* Interconnect Bus Lines */}
                 <line x1="220" y1="78" x2="275" y2="145" stroke="#ffb300" strokeWidth="2" />
-                <line x1="220" y1="210" x2="275" y2="200" stroke="#00e5ff" strokeWidth="2" />
+                <line x1="220" y1="210" x2="275" y2="200" stroke="#ff4d00" strokeWidth="2" />
                 <line x1="220" y1="330" x2="275" y2="255" stroke="#00e676" strokeWidth="2" />
                 <line x1="485" y1="165" x2="535" y2="115" stroke="#ffb300" strokeWidth="2" />
-                <line x1="485" y1="235" x2="535" y2="275" stroke="#00e5ff" strokeWidth="2" />
+                <line x1="485" y1="235" x2="535" y2="275" stroke="#ff4d00" strokeWidth="2" />
               </svg>
             </div>
           </div>
@@ -328,12 +328,12 @@ export default function NetworkPage() {
                       onClick={() => setActiveFault(fKey)}
                       className={`w-full p-2.5 text-left font-mono text-xs border cursor-pointer transition flex items-center justify-between ${
                         active
-                          ? "bg-[#151515] border-[#00e5ff] text-[#f2efe9] font-bold"
+                          ? "bg-[#151515] border-[#ff4d00] text-[#f2efe9] font-bold"
                           : "bg-[#0b0b0b] border-[#222220] text-[#88857e] hover:text-[#f2efe9]"
                       }`}
                     >
                       <span>
-                        <span className="text-[#00e5ff] mr-2">[{item.code}]</span>
+                        <span className="text-[#ff4d00] mr-2">[{item.code}]</span>
                         {item.label}
                       </span>
                       <span className="text-[10px] text-[#00e676]">INSPECT</span>
@@ -345,7 +345,7 @@ export default function NetworkPage() {
               <div className="p-4 sm:p-5 space-y-3 font-mono text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-[#88857e] text-[10px]">{faultInfo.domain}</span>
-                  <span className="px-2 py-0.5 border border-[#00e5ff] text-[#00e5ff] text-[10px] font-bold">
+                  <span className="px-2 py-0.5 border border-[#ff4d00] text-[#ff4d00] text-[10px] font-bold">
                     {faultInfo.status}
                   </span>
                 </div>
@@ -360,7 +360,7 @@ export default function NetworkPage() {
 
             <div className="p-4 border-t border-[#222220] bg-[#0b0b0b] flex items-center justify-between font-mono text-xs">
               <span className="text-[#88857e] text-[11px]">TEST LIVE IN BASIN STAGE:</span>
-              <Link href="/playground" className="text-[#00e5ff] hover:underline font-bold">
+              <Link href="/playground" className="text-[#ff4d00] hover:underline font-bold">
                 LAUNCH PLAYGROUND →
               </Link>
             </div>
@@ -382,11 +382,11 @@ export default function NetworkPage() {
                   key={m.id}
                   onClick={() => setSelectedId(m.id)}
                   className={`w-full p-4 text-left cursor-pointer transition block ${
-                    selectedId === m.id ? "bg-[#151515] border-l-4 border-l-[#00e5ff]" : "hover:bg-[#121212]"
+                    selectedId === m.id ? "bg-[#151515] border-l-4 border-l-[#ff4d00]" : "hover:bg-[#121212]"
                   }`}
                 >
                   <div className="font-mono text-xs font-bold text-[#f2efe9]">
-                    <span className="text-[#00e5ff] mr-2">[{m.code}]</span>
+                    <span className="text-[#ff4d00] mr-2">[{m.code}]</span>
                     {m.name}
                   </div>
                   <div className="font-mono text-[11px] text-[#88857e] mt-1">{m.pins}</div>
@@ -395,7 +395,7 @@ export default function NetworkPage() {
             </div>
 
             <div className="p-4 bg-[#080808] border-t border-[#222220] space-y-2 font-mono text-xs">
-              <div className="text-[#00e5ff] font-bold">{activeModule.name}</div>
+              <div className="text-[#ff4d00] font-bold">{activeModule.name}</div>
               <ul className="space-y-1.5 text-[11px] text-[#88857e] list-disc list-inside">
                 {activeModule.specs.map((sp) => (
                   <li key={sp}>{sp}</li>
@@ -411,7 +411,7 @@ export default function NetworkPage() {
                 <span>PRODUCTION SKETCH // AegisFlood_ESP32S3_Edge_Kalman_Node.ino</span>
                 <button
                   onClick={handleCopyCode}
-                  className="text-[#00e5ff] hover:underline font-bold cursor-pointer"
+                  className="text-[#ff4d00] hover:underline font-bold cursor-pointer"
                 >
                   {copied ? "✓ COPIED" : "COPY FULL SKETCH"}
                 </button>
