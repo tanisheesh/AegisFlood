@@ -17,7 +17,9 @@
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Espressif-E7352C?style=flat-square&logo=espressif&logoColor=white" alt="ESP32-S3">
   <img src="https://img.shields.io/badge/C++-00599C?style=flat-square&logo=cplusplus&logoColor=white" alt="C++">
-  <img src="https://img.shields.io/badge/license-GPL--3.0-FF4D00?style=flat-square" alt="License">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/license-GPL--3.0-FF4D00?style=flat-square" alt="License">
+  </a>
 </p>
 
 ---
