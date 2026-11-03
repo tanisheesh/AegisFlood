@@ -26,6 +26,9 @@ src/
     network/page.tsx         [03] ESP32-S3 Node Interconnect Schematic, Fault Matrix & .INO Workbench
     how-it-works/page.tsx    [04] Governing hydrological, Kalman & Dijkstra mathematical laws
     api/telegram/route.ts    Serverless ITU-T CAP v1.2 & Telegram Bot alert dispatcher
+    opengraph-image.tsx      Dynamic 1200x630 OpenGraph social preview card
+    twitter-image.tsx        Twitter summary_large_image card
+    apple-icon.tsx           180x180 Apple touch icon generator
   components/
     navbar.tsx               Sticky industrial navigation bar with active route indicators
     footer.tsx               Standardized project metadata & navigation footer
