@@ -61,6 +61,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: ["/icon.svg"],
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
   },
   category: "technology",
 };
@@ -94,7 +95,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <head>
         <script
           type="application/ld+json"
