@@ -122,7 +122,7 @@ export default function LandingPage() {
                 <span>ESP32-S3 // 1D KALMAN GATE // SAINT-VENANT WAVE // SX1276 865MHZ LORA</span>
               </div>
 
-              <h1 className="font-display font-black uppercase text-[clamp(40px,9vw,94px)] leading-[0.9] tracking-tight text-[#f2efe9] mb-5 sm:mb-6 break-words">
+              <h1 className="font-display font-black uppercase text-[clamp(34px,8.5vw,92px)] leading-[0.9] tracking-tight text-[#f2efe9] mb-5 sm:mb-6 break-words">
                 STATIC WATER
                 <br />
                 ALARMS FAIL BEFORE
@@ -438,8 +438,8 @@ export default function LandingPage() {
             <span>EVALUATION ACROSS 5 CRITICAL DIMENSIONS</span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse font-mono text-xs">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full min-w-[680px] text-left border-collapse font-mono text-xs">
               <thead>
                 <tr className="border-b border-[#222220] bg-[#0b0b0b] text-[#88857e] text-[10px] sm:text-[11px] uppercase">
                   <th className="p-3 sm:p-4 border-r border-[#222220]">Architecture</th>

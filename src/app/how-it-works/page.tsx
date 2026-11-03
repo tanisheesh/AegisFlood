@@ -163,7 +163,7 @@ export default function HowItWorksPage() {
             <span>4 ARCHITECTURAL UPGRADES</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md: gap-0 border-t border-[#222220]">
+          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:gap-0 border-t border-[#222220]">
             {LIMITATIONS_VS_FUTURE.map((item) => (
               <div key={item.id} className="p-5 border-b border-r border-[#222220] space-y-2.5">
                 <div className="flex items-center justify-between font-mono text-xs">

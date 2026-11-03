@@ -109,7 +109,32 @@ export default function PlaygroundPage() {
     }))
   );
 
-  const [historyByNode, setHistoryByNode] = useState<Record<string, TelemetrySample[]>>({});
+  const [historyByNode, setHistoryByNode] = useState<Record<string, TelemetrySample[]>>(() => {
+    const initial: Record<string, TelemetrySample[]> = {};
+    BASIN_NODES.forEach((cfg, idx) => {
+      const samples: TelemetrySample[] = [];
+      for (let i = 0; i < 30; i++) {
+        const wave = Math.sin(i * 0.22 + idx) * 0.02;
+        const noise = Math.cos(i * 0.65 + idx) * 0.03;
+        const kalmanStage = Number((cfg.baseLevelM + wave).toFixed(3));
+        const rawStage = Number((kalmanStage + noise).toFixed(3));
+        samples.push({
+          tick: i + 1,
+          ts: `00:00:${String(i).padStart(2, "0")}`,
+          nodeId: cfg.id,
+          rawStageM: rawStage,
+          kalmanStageM: kalmanStage,
+          forecast60M: Number((kalmanStage + 0.05).toFixed(2)),
+          residualM: Number(Math.abs(rawStage - kalmanStage).toFixed(3)),
+          dischargeM3s: Number((265 + idx * 18).toFixed(1)),
+          rainfallMmHr: 4.0,
+          anomalyRejected: false,
+        });
+      }
+      initial[cfg.id] = samples;
+    });
+    return initial;
+  });
   const [alerts, setAlerts] = useState<CapAlertItem[]>([
     {
       id: "CAP-INIT",
@@ -490,6 +515,38 @@ export default function PlaygroundPage() {
       setRainMmHr(155);
       setDamReleaseM3s(450);
       setDebrisFaultNode(null);
+      // Seed immediate headwater surge on NODE-01 & NODE-02 and queue downstream wave
+      BASIN_NODES.forEach((_, idx) => {
+        waveQueueRef.current.push({
+          targetIdx: idx,
+          arriveTick: tickRef.current + idx * 2,
+          surgeM: 0.65 * Math.pow(0.9, idx),
+        });
+      });
+      setNodesState((prev) =>
+        prev.map((n, idx) => {
+          const boost = idx === 0 ? 1.85 : idx === 1 ? 1.15 : idx === 2 ? 0.55 : 0.2;
+          const nextLvl = Number((BASIN_NODES[idx].baseLevelM + boost).toFixed(3));
+          kalmanInternalRef.current[n.id] = {
+            x: nextLvl,
+            p: 0.4,
+            k: 0.09,
+            prevX: n.kalmanLevelM,
+          };
+          return {
+            ...n,
+            trueLevelM: nextLvl,
+            rawSensorLevelM: nextLvl,
+            kalmanLevelM: nextLvl,
+            forecast15m: Number((nextLvl + 0.45).toFixed(2)),
+            forecast30m: Number((nextLvl + 0.85).toFixed(2)),
+            forecast60m: Number((nextLvl + 1.35).toFixed(2)),
+            forecast120m: Number((nextLvl + 1.55).toFixed(2)),
+            status: idx <= 1 ? "WARNING" : "WATCH",
+            inundationRadiusPx: Math.round(28 + boost * 22),
+          };
+        })
+      );
       pushAlert(
         "WARNING",
         "NODE-01",
@@ -499,20 +556,56 @@ export default function PlaygroundPage() {
     } else if (id === "dam_release") {
       setRainMmHr(60);
       setDamReleaseM3s(2200);
+      setNodesState((prev) =>
+        prev.map((n, idx) => {
+          const boost = idx === 1 ? 2.45 : idx === 2 ? 2.15 : idx === 0 ? 1.4 : 1.25;
+          const nextLvl = Number((BASIN_NODES[idx].baseLevelM + boost).toFixed(3));
+          kalmanInternalRef.current[n.id] = {
+            x: nextLvl,
+            p: 0.4,
+            k: 0.09,
+            prevX: n.kalmanLevelM,
+          };
+          return {
+            ...n,
+            trueLevelM: nextLvl,
+            rawSensorLevelM: nextLvl,
+            kalmanLevelM: nextLvl,
+            forecast15m: Number((nextLvl + 0.5).toFixed(2)),
+            forecast30m: Number((nextLvl + 0.95).toFixed(2)),
+            forecast60m: Number((nextLvl + 1.45).toFixed(2)),
+            forecast120m: Number((nextLvl + 1.6).toFixed(2)),
+            status: nextLvl >= n.dangerLevelM ? "CRITICAL" : "WARNING",
+            inundationRadiusPx: Math.round(30 + boost * 22),
+          };
+        })
+      );
       pushAlert(
         "CRITICAL",
         "NODE-02",
         "SCENARIO // 2,200 m³/s SPILLWAY RADIAL GATES OPENED",
-        "High-velocity surge released at Tapovan Barrage. Low-lying bridges projected to submerge."
+        "High-velocity surge released at Tapovan Barrage. Low-lying bridges submerged; Dijkstra rerouting active."
       );
     } else if (id === "debris_fault") {
       setSelectedNodeId("NODE-03");
       setDebrisFaultNode("NODE-03");
+      setNodesState((prev) =>
+        prev.map((n) =>
+          n.id === "NODE-03"
+            ? {
+                ...n,
+                rawSensorLevelM: Number((n.trueLevelM + 2.08).toFixed(3)),
+                innovationResidualM: 2.08,
+                isAnomalyRejected: true,
+              }
+            : n
+        )
+      );
       pushAlert(
         "KALMAN_GATE",
         "NODE-03",
         "FAULT INJECTED // FLOATING TIMBER SPIKE AT NODE-03",
-        "Simulating +2.0m raw sonar reflection on N03. Observe 1D Kalman Innovation Gate preventing false alarm."
+        "Simulating +2.08m raw sonar reflection on N03. Observe 1D Kalman Innovation Gate preventing false alarm."
       );
     } else if (id === "lora_failover") {
       setCellularDown((prev) => {
@@ -534,6 +627,34 @@ export default function PlaygroundPage() {
       setDamReleaseM3s(2400);
       setDebrisFaultNode("NODE-03");
       setCellularDown(true);
+      setNodesState((prev) =>
+        prev.map((n, idx) => {
+          const boost = 2.65 - idx * 0.12;
+          const nextLvl = Number((BASIN_NODES[idx].baseLevelM + boost).toFixed(3));
+          kalmanInternalRef.current[n.id] = {
+            x: nextLvl,
+            p: 0.4,
+            k: 0.09,
+            prevX: n.kalmanLevelM,
+          };
+          return {
+            ...n,
+            trueLevelM: nextLvl,
+            rawSensorLevelM: n.id === "NODE-03" ? Number((nextLvl + 2.1).toFixed(3)) : nextLvl,
+            kalmanLevelM: nextLvl,
+            isAnomalyRejected: n.id === "NODE-03",
+            innovationResidualM: n.id === "NODE-03" ? 2.1 : 0.02,
+            forecast15m: Number((nextLvl + 0.55).toFixed(2)),
+            forecast30m: Number((nextLvl + 1.05).toFixed(2)),
+            forecast60m: Number((nextLvl + 1.55).toFixed(2)),
+            forecast120m: Number((nextLvl + 1.8).toFixed(2)),
+            etaToDangerMins: 0,
+            status: "CRITICAL",
+            inundationRadiusPx: 72,
+            transportMode: "LORAWAN_865_MESH",
+          };
+        })
+      );
       pushAlert(
         "CRITICAL",
         "SYSTEM",
@@ -666,9 +787,9 @@ export default function PlaygroundPage() {
             </div>
           </div>
 
-          <div className="p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2.5 border-b border-[#222220]">
+          <div className="p-3 sm:p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-2.5 border-b border-[#222220]">
             {/* Scenario Preset Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
               {[
                 { id: "nominal", label: "01 // NOMINAL FLOW" },
                 { id: "cloudburst", label: "02 // 155mm/h CLOUDBURST" },
@@ -1155,13 +1276,15 @@ export default function PlaygroundPage() {
 
               {/* 5-Station Selector Bar below Canvas */}
               <div className="grid grid-cols-2 sm:grid-cols-5 border-t border-[#222220] bg-[#0e0e0e]">
-                {nodesState.map((n) => {
+                {nodesState.map((n, idx) => {
                   const active = n.id === selectedNodeId;
                   return (
                     <button
                       key={n.id}
                       onClick={() => setSelectedNodeId(n.id)}
                       className={`p-2.5 text-left font-mono border-r border-b sm:border-b-0 border-[#222220] last:border-r-0 cursor-pointer transition ${
+                        idx === 4 ? "col-span-2 sm:col-span-1" : ""
+                      } ${
                         active ? "bg-[#151515] border-t-2 border-t-[#ff4d00]" : "hover:bg-[#121212]"
                       }`}
                     >
@@ -1249,8 +1372,8 @@ export default function PlaygroundPage() {
               </div>
 
               {/* SVG Real-Time Waveform Strip Chart */}
-              <div className="p-3 sm:p-4 bg-[#080808]">
-                <svg viewBox="0 0 800 190" className="w-full h-44 bg-[#0b0d10] border border-[#222220]">
+              <div className="p-3 sm:p-4 bg-[#080808] space-y-3">
+                <svg viewBox="0 0 800 190" className="w-full h-44 bg-[#0c0c0b] border border-[#222220]">
                   {/* Horizontal Grid Lines */}
                   {[30, 75, 120, 165].map((y) => (
                     <line
@@ -1259,7 +1382,7 @@ export default function PlaygroundPage() {
                       y1={y}
                       x2="800"
                       y2={y}
-                      stroke="#1a1d24"
+                      stroke="#1c1c1a"
                       strokeWidth="1"
                     />
                   ))}
@@ -1343,6 +1466,36 @@ export default function PlaygroundPage() {
                     <span className="text-[#ffb300]">━━ CH3: +60 MIN AI WAVE FORECAST</span>
                   </div>
                   <span>WINDOW: 50 SAMPLES @ 10Hz</span>
+                </div>
+
+                {/* Multi-Horizon Forecast Strip (+15m, +30m, +60m, +120m, ETA) */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 border border-[#222220] bg-[#0e0e0e] font-mono text-[11px]">
+                  <div className="p-2.5 border-r border-b sm:border-b-0 border-[#222220]">
+                    <div className="text-[9px] text-[#88857e]">HORIZON +15 MIN</div>
+                    <div className="font-bold text-[#f2efe9] mt-0.5">{activeNode.forecast15m.toFixed(2)} m</div>
+                  </div>
+                  <div className="p-2.5 sm:border-r border-b sm:border-b-0 border-[#222220]">
+                    <div className="text-[9px] text-[#88857e]">HORIZON +30 MIN</div>
+                    <div className="font-bold text-[#f2efe9] mt-0.5">{activeNode.forecast30m.toFixed(2)} m</div>
+                  </div>
+                  <div className="p-2.5 border-r border-b sm:border-b-0 border-[#222220]">
+                    <div className="text-[9px] text-[#ffb300]">HORIZON +60 MIN</div>
+                    <div className="font-bold text-[#ffb300] mt-0.5">{activeNode.forecast60m.toFixed(2)} m</div>
+                  </div>
+                  <div className="p-2.5 sm:border-r border-b sm:border-b-0 border-[#222220]">
+                    <div className="text-[9px] text-[#88857e]">HORIZON +120 MIN</div>
+                    <div className="font-bold text-[#f2efe9] mt-0.5">{activeNode.forecast120m.toFixed(2)} m</div>
+                  </div>
+                  <div className="p-2.5 col-span-2 sm:col-span-1">
+                    <div className="text-[9px] text-[#ff4d00]">ETA TO DANGER</div>
+                    <div className="font-bold text-[#00e676] mt-0.5">
+                      {activeNode.etaToDangerMins === 0
+                        ? "BREACHED (0 MIN)"
+                        : activeNode.etaToDangerMins !== null
+                        ? `~${activeNode.etaToDangerMins} MINS`
+                        : "CLEAR (>180m)"}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
