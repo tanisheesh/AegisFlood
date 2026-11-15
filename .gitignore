@@ -19,6 +19,13 @@
 # misc
 .DS_Store
 *.pem
+*.key
+
+# brag / generated media
+brag-output/
+
+# testing
+playwright-report/
 
 # debug
 npm-debug.log*
@@ -37,8 +44,7 @@ yarn-error.log*
 # vercel
 .vercel
 
-# typescript
+# typescript & generated agent stubs
 *.tsbuildinfo
 next-env.d.ts
-AGENTS.md
 CLAUDE.md
