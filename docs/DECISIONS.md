@@ -2,68 +2,103 @@
 
 ---
 
-## Decision 1 — 1D Kalman Filter with $3.8\sigma$ Innovation Gate over Moving Average
+## ADR-01 — 1D Kalman Filter with $3.8\sigma$ Innovation Gate over Moving Average
 
-**Context:** Bridge-mounted ultrasonic and radar water-stage sensors suffer from sudden `+1.5 m` to `+2.5 m` measurement spikes when floating timber, tree branches, or thick storm foam pass through the beam cone.
+**Context:** Bridge-mounted ultrasonic (`40 kHz` JSN-SR04T) and radar water-stage transducers suffer from sudden `+1.5 m` to `+2.5 m` time-of-flight spikes when floating logs, tree branches, or monsoon storm foam pass through the beam cone.
 
-**Decision:** Implement a 1D Kalman state estimator on the ESP32-S3 edge node with an innovation gate ($r_k = |z_k - \hat{x}_k^-| > 0.45\text{ m}$) that dynamically inflates measurement noise covariance $R_{\text{eff}} = 65 \cdot R$ during anomalous ticks.
+### Options Considered
 
-**Reason:** A simple $N$-sample moving average introduces dangerous phase lag during genuine flash floods while still getting pulled upward by sustained debris spikes. Innovation gating drives the Kalman gain $K_k = P_k^- / (P_k^- + R_{\text{eff}})$ near zero only during physically impossible 1-second jumps, achieving zero-lag tracking of real surges and 100% rejection of single-tick debris artifacts.
+| Option | Tracking Lag | Debris Spike Rejection | MCU Cost (ESP32-S3) | Verdict |
+|---|---|---|---|---|
+| **1D Kalman + $3.8\sigma$ Innovation Gate (`R×65`)** | Zero phase lag on genuine surges | `100%` single-tick spike attenuation (`\|r_k\| > 0.45 m`) | `< 45 µs` / sample (32-bit FPU) | ✅ **Chosen** |
+| Simple $N$-Sample Moving Average | `N/2` sample delay during flash surges | Pulled upward (`+2.0 m / N`) by spikes | `< 5 µs` / sample | ❌ Rejected |
+| Median-of-5 Filter | `2`-sample lag + staircase quantization | Rejects 1–2 ticks; vulnerable to consecutive log jams | `< 15 µs` / sample | ❌ Rejected |
+| Raw Transducer + Debounced Timer | `3–10 s` forced siren delay | Delayed false alarm if log lingers | Negligible | ❌ Rejected |
 
-**Tradeoff:** Requires tuning process variance $Q$ (`0.008 m²`) and gate threshold (`0.45 m`) to the specific channel hydraulics, which we expose via the live in-browser C++ Firmware Patcher.
+**Decision & Reason:** Implement a continuous 1D Kalman state estimator (`Q = 0.008 m²`, `R = 0.080 m²`) with an innovation gate (`|z_k - x̂_k⁻| > 0.45 m`) that scales measurement covariance `R_eff = 65.0 * R` during physically impossible 1-second jumps. Kalman gain $K_k$ collapses near zero only on anomalous ticks while tracking true flood crests without moving-average delay.
 
----
+**Tradeoff Accepted:** Requires calibrating process variance $Q$ and `INNOVATION_GATE_M` to channel hydraulics; mitigated by exposing live OTA constant tuning in the `/playground` Firmware Patcher.
 
-## Decision 2 — Self-Contained TypeScript Hydrological Engine on Vercel over Split Python WebSocket Backend
-
-**Context:** An earlier iteration ran the hydrological loop in a separate Python FastAPI WebSocket server, which suffered from proxy disconnects and 30–50 second cold-start delays on free-tier cloud hosts.
-
-**Decision:** Port the complete 1D Saint-Venant kinematic wave solver, Manning discharge equations, 1D Kalman filter, and Dijkstra evacuation graph solver to deterministic TypeScript inside the Next.js 16 application, keeping external communication inside serverless Route Handlers (`/api/telegram`).
-
-**Reason:** Running the numerical solvers client-side at 60 FPS guarantees zero network jitter, instantaneous response to slider and firmware patch changes, and 100% uptime on Vercel's global edge network.
-
-**Tradeoff:** Simulation state is per-browser-session rather than globally shared across concurrent viewers, which is ideal for an interactive workbench where each visitor tests their own flood scenarios.
+**Reversal Trigger:** Revisit and upgrade to a 2-state Extended/Unscented Kalman Filter (stage + vertical velocity `[h, dh/dt]`) if field trials pair 77 GHz radar with a submerged vented piezometer or encounter sustained > 30-second floating debris rafts.
 
 ---
 
-## Decision 3 — Dynamic Dijkstra Road Graph $G(V, E)$ over Static Evacuation Maps
+## ADR-02 — Self-Contained TypeScript Solvers on Vercel over Split Python WebSocket Backend
 
-**Context:** Standard community flood warning systems broadcast a static text alert or fixed PDF map, which often directs evacuees across low-lying river causeways and suspension bridges that submerge first.
+**Context:** Running the hydrological loop inside a separate Python FastAPI WebSocket server introduces proxy complexity on Vercel and `30–50 s` cold-start delays on free-tier container hosts.
 
-**Decision:** Model the river basin's road network as a weighted graph $G(V, E)$ (13 nodes, 17 road edges) where each flood-vulnerable road segment is bound to its nearest hydrological sensor node and receives weight $w(e) = \infty$ when $h \ge H_{\text{submerge}}$.
+### Options Considered
 
-**Reason:** Re-running Dijkstra's algorithm on every simulation tick (`< 1 ms` for 17 edges) guarantees that emergency bulletins (`CAP v1.2` / Telegram) always provide a passable high-ground bypass route to the nearest NDRF relief shelter.
+| Option | Interactive Latency | Monthly Hosting Cost | Ops Complexity | Verdict |
+|---|---|---|---|---|
+| **Client-Side TS Engine + Next.js Route (`/api/telegram`)** | `< 2 ms` tick execution (`60 FPS` UI) | `$0/mo` (Vercel Hobby) | Low (single Next.js repo) | ✅ **Chosen** |
+| Split FastAPI + WebSocket Backend (Render) | `50–200 ms` RTT + `30–50 s` cold start | `$0` (sleeps) or `$7+/mo` | High (CORS, reconnects, dual deploys) | ❌ Rejected |
+| Next.js Server Polling (`POST /api/tick`) | `80–250 ms` RTT per tick | Higher Vercel function GB-hrs | Medium (needs Redis state store) | ❌ Rejected |
 
-**Tradeoff:** Graph topology must be pre-surveyed with bridge deck elevations ($H_{\text{submerge}}$) for each sector.
+**Decision & Reason:** Embed the 1D Saint-Venant kinematic wave queue, Manning equations, 1D Kalman estimator, and Dijkstra solver directly in TypeScript inside Next.js 16, reserving server execution strictly for `POST /api/telegram`. Visitors experience zero cold starts and instant slider/patch responsiveness.
+
+**Tradeoff Accepted:** Simulation state is isolated per browser tab rather than shared across multiple simultaneous operators.
+
+**Reversal Trigger:** Revisit and extract a stateful server/MQTT ingestion backend when physical river-basin sensors stream live telemetry into shared district EOC dashboards or when a 2D WebGPU/CUDA shallow-water solver exceeds client browser budgets.
 
 ---
 
-## Decision 4 — Dual-Mode 4G-LTE MQTT + 865 MHz LoRaWAN Mesh Backhaul
+## ADR-03 — Dynamic Dijkstra Road Graph $G(V, E)$ over Static Evacuation Maps
 
-**Context:** Cloudbursts and flash floods frequently knock out commercial cellular towers due to grid power failure or landslide fiber cuts right when telemetry is needed most.
+**Context:** Conventional flood warning bulletins issue static text advisories or fixed PDF evacuation maps that often direct citizens across low-lying river causeways and suspension bridges that submerge first.
 
-**Decision:** Specify a hybrid telemetry transport on each edge station: primary 4G-LTE MQTT TLS for high-bandwidth reporting, with automatic failover (`< 200 ms`) to an 865 MHz Semtech SX1276 LoRa P2P multi-hop mesh (`168 dB` link budget, `SF9`).
+### Options Considered
 
-**Reason:** Sub-GHz LoRa packets hop node-to-node down the river gorge (`NODE-01` → `NODE-05`) over 12–15 km line-of-sight segments without relying on any third-party cellular infrastructure.
+| Option | Submergence Awareness | Recompute Latency | Implementation Scope | Verdict |
+|---|---|---|---|---|
+| **Dynamic Dijkstra $O(\|V\|^2)$ on $G(V, E)$** | Live edge pruning (`w = ∞`) + `3.2×` proximity penalty | `< 1 ms` (`13` nodes, `17` edges) | ~110 lines pure TS | ✅ **Chosen** |
+| Static Pre-Computed Shortest Path / PDF | None (routes onto flooded bridges) | `0 ms` | Static asset | ❌ Rejected |
+| Binary-Heap A* with Geo-Heuristics | Live edge pruning | `< 1 ms` (overkill for `13` nodes) | Higher complexity | ❌ Rejected |
 
-**Tradeoff:** LoRa payload size is constrained (`32–64 bytes` at `SF9`), requiring compact binary/JSON telemetry framing.
+**Decision & Reason:** Model `4` settlements (`V1–V4`), `6` junctions (`J1–J6`), and `3` elevated NDRF shelters (`S1–S3`) across `17` edges (`E01–E17`), binding vulnerable bridges directly to upstream sensor stages (`NODE-01`–`NODE-04`). Recomputing shortest paths on every simulation tick guarantees CAP/Telegram alerts always guide residents onto passable upland bypasses.
+
+**Tradeoff Accepted:** Requires pre-surveying bridge deck submergence thresholds (`submergeLevelM`) for each monitored sector.
+
+**Reversal Trigger:** Switch from $O(|V|^2)$ adjacency scanning to binary-heap A* or Contraction Hierarchies when the district road network exceeds `1,000` vertices/edges or integrates live traffic congestion feeds.
+
+---
+
+## ADR-04 — Dual-Mode 4G-LTE MQTT + 865 MHz SX1276 LoRaWAN Mesh over Cellular-Only
+
+**Context:** Extreme cloudbursts and landslides routinely knock out district cellular towers due to grid power failure or fiber cuts right when real-time stage telemetry is critical.
+
+### Options Considered
+
+| Option | Storm Backhaul Survival | Max Hop Range | Payload Budget | Verdict |
+|---|---|---|---|---|
+| **4G-LTE MQTT TLS + 865 MHz SX1276 LoRa Mesh** | Survives cellular tower blackouts (`< 200 ms` failover) | `12–15 km` LoS (`168 dB` budget) | Compact `32–256 B` frames (`SF9`) | ✅ **Chosen** |
+| 4G-LTE Cellular Only | Total telemetry blackout on tower loss | Carrier dependent | Unlimited JSON | ❌ Rejected |
+| 2.4 GHz Wi-Fi / ESP-NOW | Fails in heavy rain & limited to `< 300 m` | `< 300 m` | High | ❌ Rejected |
+
+**Decision & Reason:** Pair primary 4G-LTE MQTT transport with automatic failover (`< 200 ms`) to an `865 MHz` Semtech SX1276 P2P LoRa mesh (`SF9`, `+20 dBm`, TDMA slotted ADR) so upstream gorge nodes hop packets down the valley to functioning gateway nodes (`NODE-05`) without telecom infrastructure.
+
+**Tradeoff Accepted:** LoRa duty-cycle and airtime constraints (`~185 ms` at `SF9`) restrict payload size (`< 64` bytes binary / compact JSON) during failover bursts.
+
+**Reversal Trigger:** Add Non-Terrestrial Network (NTN) Satellite IoT (`LoRa-FHSS` / Iridium SBD) uplink on headwater nodes if Himalayan canyon geometry blocks `865 MHz` line-of-sight paths across gaps exceeding `12–15 km`.
 
 ---
 
 ## What I'd do differently in v2
 
-- **2D Shallow-Water GPU Solver** — replace 1D cross-sectional channel interpolation with a WebGPU 2D shallow-water solver over 1-meter LiDAR DEM terrain tiles.
-- **Dual-Sensor Stage Fusion (77 GHz Radar + Vented Piezometer)** — fuse non-contact millimeter-wave radar with a submerged hydrostatic pressure sensor to detect transducer icing or bridge vibration.
-- **Spatio-Temporal GNN Forecasting** — train a Graph Attention Network on historical CWC river gauge time series for 24-hour multi-tributary forecasting.
+- **Modularize the workbench & add 4-layer test coverage** — split the `1,795`-line `src/app/playground/page.tsx` into `components/features/` + `hooks/`, extract a pure Kalman/kinematic simulation module, enforce Zod + rate limiting on `/api/telegram`, and add Vitest + Playwright/`@axe-core/playwright` gates.
+- **2D Shallow-Water WebGPU Solver** — replace 1D cross-sectional channel interpolation with 1-meter LiDAR DEM terrain tiles for street-level velocity vectors.
+- **Dual-Sensor Stage Fusion (77 GHz Radar + Vented Piezometer)** — fuse non-contact millimeter-wave radar with submerged hydrostatic pressure to eliminate rapid foam scattering.
+- **Spatio-Temporal GNN Forecasting** — train a Graph Attention Network over IMD Doppler radar rasters and CWC gauge time series for 24-hour multi-tributary lead times.
 
 ---
 
-## Explicit non-decisions (deferred to v2)
+## Explicit Non-Decisions (Deferred to v2)
 
-| Feature | Why deferred |
-|---|---|
-| WebSerial USB hardware flashing | Browser C++ constant patcher demonstrates OTA parameter tuning for every visitor without requiring a physical ESP32-S3 board plugged into USB |
-| Multi-tenant role-based auth | Open access maximizes immediate usability for engineering reviewers and recruiters |
+| Feature | Why Deferred | Trigger to Build |
+|---|---|---|
+| WebSerial USB hardware flashing | Browser OTA constant patcher validates filter behavior without requiring physical hardware tethered to USB | Field commissioning team requests zero-IDE browser flashing |
+| Multi-tenant RBAC & telemetry DB | Open stateless access maximizes immediate reviewability with `$0` infrastructure | Onboarding live municipal sensor fleets requiring audit logs |
+| Real-time multi-user WebSocket sync | Each visitor tests isolated flood/fault chaos scenarios independently | Simultaneous multi-operator EOC drill rooms |
 
 ---
 

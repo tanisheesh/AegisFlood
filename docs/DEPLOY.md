@@ -1,79 +1,121 @@
 # Deploying AegisFlood
 
-> **Live:** [https://aegisflood.tanisheesh.in](https://aegisflood.tanisheesh.in) · **Host:** Vercel · **Auto-deploy:** on push to `main`
+> **Live:** [https://aegisflood.tanisheesh.in](https://aegisflood.tanisheesh.in) · **Host:** Vercel (`aegisflood`) · **Auto-deploy:** on push to `main`
 
 For local development, see [SETUP.md](SETUP.md).
 
 ---
 
-## 1. Architecture in production
+## 1. Production Topology & Resource Limits
 
-| Piece | Runs on | Notes |
-|---|---|---|
-| Next.js 16 App & Digital Twin | Vercel | App Router static + dynamic routes (`/`, `/playground`, `/network`, `/how-it-works`) |
-| CAP / Telegram Dispatch API | Vercel Functions | `POST /api/telegram` serverless route handler |
-| DNS | GoDaddy | `aegisflood.tanisheesh.in` → CNAME to `cname.vercel-dns.com` |
-
----
-
-## 2. Environment variables
-
-Set these in the Vercel dashboard (never commit them). Names and sources are in [`.env.example`](../.env.example).
-
-| Variable | Required | Where it's set |
-|---|---|---|
-| `TELEGRAM_BOT_TOKEN` | ❌ (Optional) | Vercel → Project → Settings → Environment Variables |
-| `TELEGRAM_CHAT_ID` | ❌ (Optional) | Vercel → Project → Settings → Environment Variables |
-| `NEXT_PUBLIC_SITE_URL` | ❌ (Optional) | Defaults to `https://aegisflood.tanisheesh.in` |
-
-> After changing an env var, **redeploy**. Running deployments don't pick up new values.
+| Component | Host / Service | Region & Runtime | Configured Limits / Notes |
+|---|---|---|---|
+| Next.js 16 App & Digital Twin | Vercel (`aegisflood`) | `bom1` (India) · Node `22.x` · Fluid Compute | Static prerendered pages (`/`, `/playground`, `/network`, `/how-it-works`, dynamic OG/icons) |
+| CAP / Telegram Dispatch API | Vercel Serverless Function | `bom1` · Node `22.x` | `POST /api/telegram` · `30s` function timeout · protected sourcemaps |
+| Outbound Alert Delivery | Telegram Bot API | `https://api.telegram.org` | Only called when `botToken` + `chatId` are supplied; `30 msg/s` Telegram ceiling |
+| DNS & TLS | GoDaddy → Vercel | `aegisflood.tanisheesh.in` | CNAME → `cname.vercel-dns.com` (TTL 600s) + automatic Vercel Let's Encrypt TLS |
 
 ---
 
-## 3. First-time deploy on Vercel
+## 2. Production Environment Variables
 
-1. [vercel.com/new](https://vercel.com/new) → import `tanisheesh/AegisFlood`
-2. Framework preset: `Next.js` · Root directory: `./`
-3. Add optional env vars from section 2
-4. Deploy. Every push to `main` now deploys to production, and every PR gets a preview URL.
+Configure optional secrets in the Vercel dashboard (encrypted at rest; never commit). Full key list is in [`.env.example`](../.env.example).
+
+| Variable | Required | Host Location | Rotation / Sensitivity |
+|---|---|---|---|
+| `TELEGRAM_BOT_TOKEN` | ❌ | Vercel → Project → Settings → Environment Variables | High — server-only; omit on public demo if operators bring their own token in `/playground` |
+| `TELEGRAM_CHAT_ID` | ❌ | Vercel → Project → Settings → Environment Variables | Medium — server-only fallback chat ID |
+| `NEXT_PUBLIC_SITE_URL` | ❌ | Vercel → Project → Settings → Environment Variables | Low — origin metadata (`layout.tsx` defaults to `https://aegisflood.tanisheesh.in`) |
+
+> After editing any environment variable, **trigger a redeploy** — active deployments do not pick up updated env values automatically.
 
 ---
 
-## 4. Custom domain
+## 3. First-Time Deploy on Vercel
+
+1. [vercel.com/new](https://vercel.com/new) → import `tanisheesh/AegisFlood`.
+2. Framework preset: `Next.js` · Install command: `pnpm install --frozen-lockfile` · Root directory: `./`.
+3. Optionally add environment variables from Section 2 and deploy.
+4. Apply production, region, and security settings via the setup toolkit:
+   ```powershell
+   ..\setup-toolkit\scripts\setup-vercel-project.ps1 -Project "aegisflood" -RepoPath . -Region "bom1" -IgnoreDocsOnlyBuilds
+   ```
+
+---
+
+## 4. Stateless Persistence & Zero-Downtime Rollouts
+
+AegisFlood maintains **zero external databases or persistent schemas** in v1 — all 5-node simulation loops and Dijkstra routing graphs execute inside isolated client memory. Every Vercel deployment builds immutable static routes plus a stateless `/api/telegram` handler, providing zero-downtime atomic swaps with no database migration risk.
+
+---
+
+## 5. Custom Domain & Security Headers
 
 `aegisflood.tanisheesh.in` is wired with the setup toolkit:
 
 ```powershell
-.\scripts\setup-subdomain.ps1 -Subdomain "aegisflood" -Platform Vercel -VercelProject "aegisflood"
+..\setup-toolkit\scripts\setup-subdomain.ps1 -Subdomain "aegisflood" -Platform Vercel -VercelProject "aegisflood"
 ```
 
-Manual fallback: add `aegisflood.tanisheesh.in` in the Vercel project Domains tab, then create a GoDaddy CNAME `aegisflood` → `cname.vercel-dns.com`. HTTPS certificates are issued automatically once DNS resolves (2–10 min).
+- **Manual DNS fallback:** Add `aegisflood.tanisheesh.in` in Vercel → Project → Settings → Domains, then create a GoDaddy CNAME record `aegisflood` → `cname.vercel-dns.com` (TTL `600s`; propagation `2–10 min`).
+- **Security headers (`vercel.json`):** Enforces on `/(.*)`:
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+  - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
 
 ---
 
-## 5. Verify a deploy
+## 6. Post-Deploy Smoke Verification
 
-- [ ] `https://aegisflood.tanisheesh.in` loads the Specification page with no console errors
-- [ ] `/playground` runs the 5-node river basin simulation, Kalman oscilloscope, and Dijkstra router smoothly
-- [ ] `/network` renders the ESP32-S3 interconnect schematic and downloads the `.ino` firmware
-- [ ] `POST /api/telegram` dispatches CAP v1.2 alerts cleanly
+Run immediately after production deploys:
+
+```bash
+# 1. Verify all 4 primary routes return 200
+for path in / /playground /network /how-it-works; do
+  curl -fsS -o /dev/null -w "$path -> %{http_code}\n" "https://aegisflood.tanisheesh.in$path"
+done
+
+# 2. Verify Vercel security headers are active
+curl -sI https://aegisflood.tanisheesh.in | grep -iE "x-frame-options|x-content-type-options|strict-transport-security|referrer-policy|permissions-policy"
+
+# 3. Verify simulated CAP fallback works cleanly when credentials are omitted
+curl -fsS -X POST https://aegisflood.tanisheesh.in/api/telegram \
+  -H "Content-Type: application/json" \
+  -d '{"message":"SMOKE_CHECK"}'
+```
+
+- [ ] `https://aegisflood.tanisheesh.in` loads cleanly at mobile (`375px`) and desktop (`1280px`) with zero console errors
+- [ ] `/playground` advances ticks, rejects `+2.0 m` debris spikes (`⚡KF GATE`), reroutes Dijkstra edges, and exports `.CSV`/`.JSON`
+- [ ] `/network` renders the ESP32-S3 schematic and downloads `AegisFlood_ESP32S3_Edge_Kalman_Node.ino`
 
 ---
 
-## 6. Rollback
+## 7. Rollback Procedure
 
-| Host | How |
+| Layer | Rollback Action |
 |---|---|
-| Vercel | Dashboard → Deployments → pick the last good one → **Promote to Production** (or `vercel rollback`) |
+| **Vercel** | Dashboard → Project (`aegisflood`) → Deployments → pick last known good deploy → **Promote to Production** (or `vercel rollback`) |
 
-After rolling back, note it in a commit or PR so the next push doesn't silently re-ship the broken version.
+> Always record any manual rollback (target SHA + reason) in a commit or PR so the next push to `main` does not silently re-ship a broken commit.
 
 ---
 
-## 7. Monitoring & logs
+## 8. Incident & Quota Runbooks
 
-- **Logs:** Vercel → Project (`aegisflood`) → Logs
-- **Dependencies:** Dependabot opens weekly update PRs and a maintenance report is generated every Monday (see `.github/workflows/`)
+| Incident | Immediate Action |
+|---|---|
+| **Telegram API `401` / `429` errors** | Verify `TELEGRAM_BOT_TOKEN` via `@BotFather`; if public spam triggers `429` against shared server env vars, clear server env vars in Vercel and redeploy (falling back to user-supplied tokens or `SIMULATED_CAP_BROADCAST`) |
+| **Suspected token leak (`TELEGRAM_BOT_TOKEN`)** | Revoke token immediately in `@BotFather` (`/revoke`), rotate Vercel env var, redeploy, and verify Gitleaks + GitHub Secret Scanning clear |
+| **Vercel build failure** | Inspect Vercel build logs; reproduce locally with `pnpm install --frozen-lockfile && pnpm run typecheck && pnpm run build` |
+
+---
+
+## 9. Monitoring & Automated Maintenance
+
+- **Logs & Errors:** Vercel → Project (`aegisflood`) → Logs
+- **Automated Hygiene:** CI (`ci.yml`), CodeQL SAST (`codeql.yml`), Gitleaks Secret Scan (`secret-scan.yml`), PR Dependency Review (`dependency-review.yml`), Renovate (`renovate.yml` + `dependency-auto-merge.yml` via `Yantra [bot]`), and weekly Maintenance Report (`maintenance-report.yml`) run via `.github/workflows/`.
 
 ---
 

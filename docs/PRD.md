@@ -1,107 +1,167 @@
 # AegisFlood — Product Requirements Document
 
-**Status:** Final
-**Owner:** Tanish Poddar
-**One-liner:** Interactive 5-Node River Basin Hydrological Digital Twin, In-Browser ESP32-S3 1D Kalman Filter Patcher, Saint-Venant Kinematic Wave Forecaster, and Dynamic Dijkstra Safe Evacuation Workbench.
+| Field | Value |
+|---|---|
+| **Status** | v1.0 Live |
+| **Owner** | Tanish Poddar |
+| **Live URL** | [https://aegisflood.tanisheesh.in](https://aegisflood.tanisheesh.in) |
+| **One-liner** | Interactive 5-Node River Basin Hydrological Digital Twin, In-Browser ESP32-S3 1D Kalman Filter Patcher, Saint-Venant Kinematic Wave Forecaster, and Dynamic Dijkstra Safe Evacuation Workbench. |
 
 ---
 
-## 1. Problem
+## 1. Problem & Quantified Impact
 
-Single-point water-level float switches and raw ultrasonic flood alarms fail in two critical ways: first, they are purely reactive, triggering only after downstream embankments have already been breached and leaving zero evacuation lead time; second, floating timber, storm foam, and debris passing beneath bridge-mounted ultrasonic sensors cause severe time-of-flight spikes (`+1.5 m` to `+2.5 m`), setting off false community sirens and eroding public trust. Furthermore, during extreme cloudbursts, cellular towers often lose power or backhaul, blinding cloud-only monitoring systems, while static evacuation maps route citizens across low-lying river bridges that submerge first.
+Single-point water-level float switches and raw ultrasonic flood alarms fail in two critical ways: first, they are purely reactive, triggering only after downstream embankments have already been breached and leaving zero evacuation lead time; second, floating timber, storm foam, and debris passing beneath bridge-mounted ultrasonic sensors cause severe time-of-flight spikes (`+1.5 m` to `+2.5 m`), setting off false community sirens and eroding public trust. Furthermore, during extreme cloudbursts, cellular towers lose power or fiber backhaul, blinding cloud-only monitoring systems, while static evacuation maps route citizens across low-lying river bridges that submerge first.
+
+| Dimension | Before (Reactive Gauge / Baseline) | After (AegisFlood v1) |
+|---|---|---|
+| Flood warning lead time | `0 min` (local float/threshold trip after breach) or `10–15 min` polling lag | `+15m` to `+120m` downstream crest forecasts via 1D kinematic wave lag |
+| Floating debris false alarms | Immediate siren on raw ultrasonic spike (`+1.85 m to +2.30 m`) | `100%` single-tick spike attenuation via $3.8\sigma$ Kalman gate (`\|r_k\| > 0.45 m` → `R×65`) |
+| Evacuation routing safety | Static PDF / text bulletins cross submerged low-lying bridges | `< 2 ms` dynamic Dijkstra rerouting across `17` edges (`w(e) = ∞` when submerged) |
+| Telecom storm resilience | `4G-only` or local Wi-Fi blinds monitoring on tower power loss | Dual-mode `4G-LTE MQTT` with `< 200 ms` failover to `865 MHz` SX1276 LoRa mesh |
+| Cloud operating cost | Dedicated VM + WebSocket backend (`30–50s` cold starts) | `$0/mo` client-side deterministic twin + Vercel serverless `/api/telegram` |
 
 ---
 
 ## 2. Goals (v1 / MVP)
 
-1. Simulate a 58 km, 5-node river cascade (`NODE-01 Devprayag` to `NODE-05 Roorkee`) governed by 1D Saint-Venant kinematic wave propagation and Manning open-channel discharge ($Q = A \cdot n^{-1} R_h^{2/3} S_0^{1/2}$).
-2. Implement an on-device **1D Kalman Filter with a $3.8\sigma$ Innovation Gate** (`|r_k| > 0.45 m`) that rejects instantaneous floating-debris sonar spikes while tracking real flood surges without phase lag.
-3. Provide multi-horizon water stage forecasts (`+15 min`, `+30 min`, `+60 min`, `+120 min`) and dynamic **Dijkstra shortest-safe-path evacuation routing** on road network graph $G(V, E)$.
-4. Ship an interactive browser workbench (`/playground` and `/network`) with live C++ firmware constant patching, a dual-trace oscilloscope, `.CSV`/`.JSON` blackbox export, 865 MHz LoRaWAN mesh failover simulation, and ITU-T CAP v1.2 / Telegram Bot alert dispatch.
+1. Simulate a `58.0 km`, `5`-node river cascade (`NODE-01 Devprayag` at `830 m` ASL to `NODE-05 Roorkee` at `268 m` ASL) governed by 1D Saint-Venant kinematic wave propagation and Manning open-channel discharge ($Q = A \cdot n^{-1} R_h^{2/3} S_0^{1/2}$).
+2. Implement an edge **1D Kalman Filter with a $3.8\sigma$ Innovation Gate** (`|r_k| > 0.45 m` default) that rejects instantaneous floating-debris sonar spikes while tracking real flood surges without moving-average phase lag.
+3. Provide multi-horizon water stage forecasts (`+15m`, `+30m`, `+60m`, `+120m` and `ETA-to-Danger`) and dynamic **Dijkstra shortest-safe-path evacuation routing** across `4` settlements (`18,850` total residents) to `3` elevated NDRF shelters (`32,000` combined capacity).
+4. Ship an interactive browser workbench (`/playground` and `/network`) with live C++ firmware constant patching, a pre-warmed dual-trace oscilloscope (`30` pre-warmed samples, `50`-sample rolling buffer), `.CSV`/`.JSON` blackbox export, `865 MHz` LoRaWAN failover simulation, downloadable `.ino` sketch, and ITU-T CAP v1.2 / Telegram Bot dispatch (`/api/telegram`).
 
 ---
 
-## 3. Non-Goals (explicit scope cuts)
+## 3. Non-Goals (Explicit Scope Cuts)
 
-- **Physical serial USB hardware lock-in** — the web workbench runs as a 100% self-contained software Digital Twin in any browser without requiring physical ESP32 hardware tethered to the client machine.
-- **2D GPU shallow-water street-level mesh** — v1 uses a 1D cross-sectional Saint-Venant kinematic cascade across 5 river sectors for deterministic 60 FPS browser execution; 2D DEM hydrodynamic solvers are deferred to v2.
-- **Multi-tenant user authentication** — all simulation controls, firmware patching, and telemetry exports are immediately accessible without login barriers.
-
----
-
-## 4. Users
-
-**Primary:** Systems & IoT engineers, hydrology researchers, and disaster-management operators evaluating edge signal filtering, kinematic wave forecasting, and graph-based evacuation routing.
-
-**Secondary:** Technical recruiters and engineering interviewers reviewing the system architecture, mathematical rigor, and live interactive digital twin at `https://aegisflood.tanisheesh.in`.
+- **Physical WebSerial USB hardware flashing** — the web workbench runs as a 100% self-contained software Digital Twin in any browser without requiring physical ESP32 hardware plugged into USB; revisit if field commissioning operators request direct browser-to-UART OTA provisioning.
+- **2D GPU shallow-water street-level DEM mesh** — v1 uses a 1D cross-sectional Saint-Venant kinematic cascade across 5 river sectors for deterministic real-time browser execution; revisit in v2 when 1-meter LiDAR bathymetry tiles are integrated.
+- **Multi-tenant RBAC and server database persistence** — all simulation controls, firmware patching, and telemetry exports execute statelessly in browser memory with zero login friction; revisit when connecting live physical river-basin MQTT brokers requiring persistent audit trails and operator roles.
 
 ---
 
-## 5. User Stories
+## 4. Users & Personas
 
-1. *As an IoT engineer,* I want to inject a `+2.0 m` floating-timber acoustic glitch on `NODE-03` and watch the dual-trace oscilloscope so that I can verify the 1D Kalman Innovation Gate prevents false community sirens.
-2. *As a hydrologist,* I want to trigger a `155 mm/hr` upstream cloudburst or `2,200 m³/s` dam spillway release so that I can observe kinematic wave travel-time lag and soil-moisture runoff amplification across downstream stations.
-3. *As an emergency planner,* I want submerged riverside bridges to automatically receive infinite edge weight ($w(e) = \infty$) in road graph $G(V, E)$ so that Dijkstra's algorithm reroutes floodplain zones (`V1–V4`) onto high-ground bypasses toward NDRF shelters (`S1–S3`).
-4. *As an embedded developer,* I want to tune `KALMAN_Q`, `KALMAN_R`, and `INNOVATION_GATE_M` in the browser and download the production ESP32-S3 `.ino` sketch so that I can validate filter response before field deployment.
-5. *As an incident coordinator,* I want to dispatch an ITU-T CAP v1.2 / Telegram emergency alert containing current stage, `+60 min` forecast, and turn-by-turn shelter routing with one click.
+**Primary:** Systems and IoT engineers, hydrologists, and disaster-management planners evaluating edge Kalman filtering, kinematic wave forecasting, telecom failover, and graph-based evacuation routing.
+
+**Secondary:** Technical reviewers and engineering interviewers inspecting the live interactive digital twin, mathematical derivations (`/how-it-works`), and hardware interconnect specification (`/network`) at [https://aegisflood.tanisheesh.in](https://aegisflood.tanisheesh.in).
+
+---
+
+## 5. User Stories & Acceptance Criteria
+
+### Story 1 — Edge Kalman Debris Spike Rejection
+*As an IoT engineer, I want to inject a floating-timber sonar spike on `NODE-03` and inspect the dual-trace oscilloscope so that I can verify the 1D Kalman Innovation Gate prevents false community sirens.*
+- **Given** `/playground` is running in nominal mode (`NODE-03` base `2.90 m`), **When** I trigger preset `04 // SONAR DEBRIS SPIKE` or click `INJECT +2.0m SONAR DEBRIS GLITCH ON N03`, **Then** `CH1 // RAW SONAR STAGE` jumps by `+1.85 m to +2.30 m`, the canvas node displays `⚡KF GATE`, `R` scales `65×`, and `CH2 // 1D KALMAN FILTERED` stays near true stage without false `CRITICAL` escalation.
+- **Given** an operator widens `INNOVATION_GATE (m)` above `2.3 m` and clicks `⚡ FLASH OTA FIRMWARE TO 5 NODES`, **When** the spike occurs, **Then** the gate passes the spike through as intended, demonstrating OTA parameter sensitivity in real time.
+
+### Story 2 — Headwater Cloudburst & Kinematic Wave Propagation
+*As a hydrologist, I want to trigger a `155 mm/hr` headwater cloudburst or `2,200 m³/s` dam spillway release so that I can observe downstream travel-time lag and soil-moisture runoff amplification.*
+- **Given** the simulation clock (`1x`, `2x`, or `4x`) is active, **When** I select `02 // 155mm/h CLOUDBURST`, **Then** kinematic wave packets enter `waveQueueRef` with downstream arrival lag `idx * 3` ticks and attenuation `0.91^idx`, soil moisture rises up to `98.5%`, and `C_r` scales incoming surges up to `1.60×`.
+- **Given** forecasted `+60m` stage approaches `dangerLevelM`, **When** `kalmanLevelM < dangerLevelM` and `forecast60m >= dangerLevelM`, **Then** `ETA TO DANGER` computes a bounded estimate (`4–90 MINS`).
+
+### Story 3 — Dynamic Dijkstra Bridge Pruning & Evacuation Rerouting
+*As an emergency planner, I want submerged low-lying bridges to receive infinite weight in $G(V, E)$ so that evacuation routes automatically move onto elevated highway bypasses.*
+- **Given** a monitored road edge (e.g., `E10 Triveni Underpass Road` monitored by `NODE-03` at `submergeLevelM = 5.0 m`), **When** `NODE-03` filtered stage reaches `>= 4.35 m` (`submergeLevelM - 0.65 m`), **Then** the edge incurs a `3.2×` weight penalty; when stage reaches `>= 5.0 m`, the edge renders `✕ SUBMERGED` with `w(e) = ∞` and Dijkstra reroutes `V3` onto `E12 Sector-3 Elevated Ramp` → `J4` → `S2`.
+
+### Story 4 — Live Firmware Constant Patching & `.INO` Export
+*As an embedded developer, I want to tune `KALMAN_Q`, `KALMAN_R`, and `INNOVATION_GATE_M` and download the production `.ino` sketch so that I can validate filter behavior before flashing an ESP32-S3.*
+- **Given** `/playground` Tab `02 // C++ PATCHER`, **When** I adjust `KALMAN_Q`, `KALMAN_R`, `INNOVATION_GATE`, or `DANGER_OFFSET` and click `⚡ FLASH OTA FIRMWARE TO 5 NODES`, **Then** all 5 simulated nodes adopt the patched constants immediately and display confirmation banner `✓ FLASHED ESP32-S3 OTA`.
+- **Given** `/` or `/network`, **When** I click `DOWNLOAD .INO SKETCH`, **Then** the browser downloads `AegisFlood_ESP32S3_Edge_Kalman_Node.ino` containing the complete C++ sketch (`FULL_ESP32_SKETCH`).
+
+### Story 5 — ITU-T CAP v1.2 / Telegram Alert Dispatch & Blackbox Export
+*As an incident coordinator, I want to broadcast a structured emergency bulletin and export sensor blackbox logs so that responders receive live stage, forecast, and shelter instructions.*
+- **Given** no Telegram credentials are configured in `.env.local` or UI inputs, **When** I click `🚨 DISPATCH CAP / TELEGRAM ALERT`, **Then** `POST /api/telegram` returns HTTP `200` with `mode: "SIMULATED_CAP_BROADCAST"` and appends the CAP event to the rolling bus log.
+- **Given** valid `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, **When** I click `🚨 DISPATCH CAP / TELEGRAM ALERT`, **Then** `POST /api/telegram` forwards the Markdown bulletin to Telegram Bot API and returns `mode: "LIVE_TELEGRAM_PUSH"`.
+- **Given** oscilloscope history is populated, **When** I click `⬇ CSV` or `⬇ JSON`, **Then** the browser downloads up to `50` telemetry samples for the selected node (`aegisflood_<node>_telemetry.{csv,json}`).
 
 ---
 
 ## 6. Functional Requirements
 
 ### 6.1 5-Node Hydrological & Kinematic Wave Engine
-
-- Maintain real-time state for 5 stations (`N01` to `N05`) across 58 km of river channel with realistic elevation, channel width, bed slope $S_0$, and Manning roughness $n$.
-- Propagate upstream precipitation and dam spillway surges downstream using kinematic wave lag and distance attenuation, scaled by volumetric soil-moisture runoff factor $C_r \in [1.0, 1.6]$.
+- Maintain live state (`NodeLiveState`) for `5` stations (`NODE-01` to `NODE-05`) spanning `58.0 km` with node-specific `baseLevelM`, `warningLevelM`, `dangerLevelM`, `criticalLevelM`, `channelWidthM` (`38 m` to `105 m`), `manningN` (`0.035` to `0.022`), and `bedSlope` (`0.012` to `0.0024`).
+- Advance simulation on configurable speed (`900 ms` at `1x`, `450 ms` at `2x`, `225 ms` at `4x`), plus pause/resume and `6` instant scenario presets (`nominal`, `cloudburst`, `dam_release`, `debris_fault`, `lora_failover`, `compound`).
+- Compute wetted area $A$, wetted perimeter, hydraulic radius $R_h$, Manning velocity $v$, volumetric discharge $Q$ ($\text{m}^3/\text{s}$), and surface runoff coefficient $C_r \in [1.0, 1.6]$ from simulated volumetric soil moisture $\theta_v \in [36\%, 98.5\%]$.
 
 ### 6.2 Edge 1D Kalman Filter & Innovation Gate
-
-- Compute prior state $\hat{x}_k^-$, error covariance $P_k^- = P_{k-1} + Q$, and innovation residual $r_k = |z_k - \hat{x}_k^-|$ on every tick.
-- Inflate measurement noise variance $R_{\text{eff}} = 65 \cdot R$ whenever $r_k > \text{INNOVATION\_GATE\_M}$, flagging the sample as a mitigated hardware/debris anomaly.
+- Compute prior covariance $P_k^- = P_{k-1} + Q$, innovation residual $r_k = |z_k - \hat{x}_k^-|$, and effective measurement variance $R_{\text{eff}} = 65 \cdot R$ when $r_k > \text{INNOVATION\_GATE\_M}$.
+- Compute Kalman gain $K_k = P_k^- / (P_k^- + R_{\text{eff}})$, posterior stage $\hat{x}_k$, and vertical rate-of-rise `dh/dt` (`instantRiseM * 18.0 m/hr`).
+- Expose `KALMAN_Q` (`0.001–0.5`), `KALMAN_R` (`0.01–1.0`), `INNOVATION_GATE_M` (`0.15–2.5`), and `DANGER_OFFSET` (`-1.5 to +1.5`) via Tab `02 // C++ PATCHER`.
 
 ### 6.3 Dynamic Dijkstra Safe Evacuation Router
+- Model `13` vertices (`V1–V4` settlements with `1,450 + 3,200 + 5,800 + 8,400 = 18,850` residents; `J1–J6` road junctions; `S1–S3` NDRF shelters with `5,000 + 12,000 + 15,000 = 32,000` capacity) and `17` bidirectional weighted road edges (`E01–E17`).
+- Recompute shortest safe paths on every render/tick via `computeDijkstraEvacuation(nodeLevels)`, assigning $w(e) = \infty$ when `lvl >= submergeLevelM` and $w(e) = 3.2 \cdot d(e)$ when `lvl >= submergeLevelM - 0.65`.
 
-- Model 4 community settlements (`V1–V4`), 6 road junctions (`J1–J6`), and 3 elevated NDRF shelters (`S1–S3`) connected by 17 weighted road edges.
-- Recompute shortest safe paths on every simulation tick, setting $w(e) = \infty$ when a road's governing river node crosses $H_{\text{submerge}}$ and applying a $3.2\times$ proximity penalty when within `0.65 m` of submergence.
-
-### 6.4 Telemetry Workbench & CAP/Telegram Dispatch
-
-- Render an interactive SVG river basin digital twin, dual-trace oscilloscope (`CH1: RAW_SONAR`, `CH2: KALMAN_TRUE`, `CH3: +60M_FORECAST`), and `.CSV`/`.JSON` blackbox exporter.
-- Provide `/api/telegram` to broadcast formatted emergency bulletins via the Telegram Bot API (or log simulated CAP v1.2 frames when credentials are omitted).
+### 6.4 Hardware, Telemetry & Alert Specification
+- **Edge MCU & Sensors (`/network`):** `ESP32-S3 @ 240 MHz` (`< 45 µs` Kalman cycle), `JSN-SR04T / 24 GHz Radar` (`0.20–8.00 m`, `±3 mm`, `GPIO4/5`), `0.2 mm/tip` reed hyetograph (`GPIO19`), capacitive soil moisture probe (`GPIO34 / ADC1_CH6`), `Semtech SX1276 865–867 MHz LoRa` (`168 dB` link budget, `+20 dBm`, `SF9` ~185 ms ToA, `< 200 ms` failover), `20W Solar + MPPT + 6.4V 6000mAh LiFePO4 + INA219` (`14–18 day` autonomy), and opto-isolated `115 dB` siren relay (`GPIO21`).
+- **Oscilloscope & Alerts (`/playground`):** Pre-warmed `30`-sample trace expanded up to `50` samples (`CH1`, `CH2`, `CH3`, `DANGER DATUM`), bounded `25`-item rolling CAP v1.2 alert log, optional Web Audio sawtooth tactical beep, and `POST /api/telegram`.
 
 ---
 
-## 7. Non-Functional Requirements
+## 7. Edge-Case & Failure Behavior Matrix
 
-- **Latency:** Simulation tick, 5-node Kalman update, and 17-edge Dijkstra shortest-path solver execute in `< 2 ms` client-side; `/api/telegram` responds in `< 1.5 s`.
-- **Security:** Optional Telegram bot credentials are handled via server-side environment variables or ephemeral request payloads, never persisted or logged.
-- **Reliability:** Zero external database or stateful WebSocket server dependencies — 100% serverless-compatible on Vercel with zero cold-start failures.
-- **Responsiveness:** Industrial precision UI adapts cleanly across mobile (`360px`), tablet (`768px`), and widescreen desktop (`1400px+`) viewports.
-
----
-
-## 8. Success Metrics
-
-| Metric | Target |
-|---|---|
-| Debris spike false-alarm rejection | 100% of single-tick spikes `> 0.45 m` rejected without triggering CRITICAL status |
-| Forecast lead time on downstream nodes | 30–90 minutes advance warning on `NODE-04` / `NODE-05` after headwater surge |
-| Dijkstra route recomputation latency | `< 2 ms` per tick across all 4 floodplain zones |
+| Scenario | Expected System Behavior | User Feedback / Status |
+|---|---|---|
+| Single-tick debris spike (`+1.85 m` to `+2.30 m`) | Residual exceeds `0.45 m` gate; `R_eff = 65 * R` suppresses spike | Node badge `⚡KF GATE` + `KALMAN_GATE` alert bus entry |
+| Telegram credentials omitted on alert dispatch | `/api/telegram` skips external call; returns simulated receipt | HTTP `200` (`SIMULATED_CAP_BROADCAST`), amber/orange confirmation banner |
+| Invalid Telegram Bot Token or Chat ID | `/api/telegram` forwards Telegram error payload cleanly without throwing | HTTP `200` (`ok: false`, `mode: "TELEGRAM_API_ERROR"`, upstream detail) |
+| Malformed JSON body sent to `/api/telegram` | Caught in route `try/catch` handler | HTTP `500` (`ok: false`, `mode: "ERROR"`) |
+| 4G-LTE backhaul severed (`cellularDown = true`) | Transport switches from `4G_MQTT_TLS` to `LORAWAN_865_MESH`; RSSI drops `-72` → `-94 dBm` | Top bar amber indicator + LoRa P2P dashed links highlighted |
+| Direct village road edge submerged | `w(e) = ∞`; Dijkstra selects upland junction bypass (`J2`, `J4`, `J6`) | Edge turns dashed red `✕ SUBMERGED`; route status `REROUTED // BYPASS` |
+| Browser Web Audio autoplay locked | `playTacticalBeep` catches AudioContext restriction gracefully | Simulation continues unimpeded; toggle `🔇 SYNTH OFF` / `🔊 SYNTH ON` |
+| Mobile viewport (`360px` / `375px`) | Single-column responsive stacking + 4-button mobile nav strip | Zero horizontal page overflow (`overflow-x-hidden`) |
 
 ---
 
-## 9. Risks & Open Questions
+## 8. Non-Functional Requirements & Budgets
 
-- **Acoustic foam attenuation in extreme rapids** — 40 kHz ultrasonic pulses can scatter over heavy whitewater foam; mitigated in hardware spec by pairing 24 GHz FMCW radar transducers.
-- **Terrestrial LoRa canyon shadowing** — deep mountain gorges can attenuate 865 MHz P2P links beyond 10 km; mitigated by multi-hop node relaying along the river corridor.
+- **Latency:** 5-node simulation tick, 1D Kalman update, and 17-edge Dijkstra computation complete in `< 2 ms` client-side; `/api/telegram` completes within Vercel serverless limits (`< 1.5 s` typical upstream Telegram roundtrip).
+- **Security:** `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are strictly optional server-side environment variables or transient per-request inputs; zero `NEXT_PUBLIC_` secret exposure; HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`) enforced in `vercel.json`.
+- **Reliability:** Zero database, zero WebSocket server, and zero cold-start backend dependency — all 4 UI routes prerender statically (`○`) on Next.js 16 + Vercel.
+- **Accessibility:** Semantic landmarks (`<header>`, `<nav>`, `<main>`, `<footer>`), `aria-label` on SVG canvas and mobile nav, high-contrast `#F2EFE9` on `#080808` / `#0E0E0E` surfaces.
 
 ---
 
-## 10. v2 Candidates
+## 9. Unit Economics & Quota Budget
 
-- **2D Shallow-Water GPU Hydrodynamic Solver** — integrate 1-meter LiDAR DEM bathymetry for street-level flood velocity vectors.
-- **Spatio-Temporal Graph Neural Network (ST-GNN)** — ingest IMD Doppler weather radar rasters for 24-hour tributary forecasting.
-- **Direct-to-Satellite LoRa-FHSS Uplink** — add satellite IoT backhaul for headwater nodes when both 4G and terrestrial mesh links are severed.
+| Resource | Free-Tier / Plan Limit | Estimated Usage per 1,000 Sessions | Headroom / Scaling Note |
+|---|---|---|---|
+| Vercel Hosting & Bandwidth | Hobby `100 GB` bandwidth · `100 GB-hrs` serverless | Static pages cached at CDN edge; `/api/telegram` invoked only on manual click | Docs-only commits ignored via Vercel build step; near-zero serverless spend |
+| Client Browser Compute | User device CPU (`< 2 ms` / tick @ `1.1–4.4 Hz`) | `100%` local execution in browser memory | Scales horizontally to unlimited concurrent viewers with `$0` server CPU |
+| Telegram Bot API | `30 msg/s` global · `20 msg/min` per group | `1` request per explicit `DISPATCH CAP` button press | Rate-limiting recommended before exposing shared server bot token publicly |
+| Database / LLM Spend | None (`$0`) | `0` DB queries · `0` LLM tokens | Stateless architecture eliminates DB/LLM bill variance |
+
+---
+
+## 10. Success Metrics & Instrumentation
+
+| Metric | Target | How Measured |
+|---|---|---|
+| Debris spike false-alarm rejection | `100%` of single-tick spikes `> 0.45 m` attenuated without false `CRITICAL` | Oscilloscope `CH1` vs `CH2` delta & `KALMAN_GATE` alert counter |
+| Downstream forecast lead time | `30–90 min` advance `ETA TO DANGER` on `N04`/`N05` after headwater surge | Multi-horizon strip (`+15m`..`+120m`) & `etaToDangerMins` solver output |
+| Typecheck & production build | `0` TypeScript errors & clean static/dynamic Next.js build | `pnpm run typecheck && pnpm run build` in GitHub Actions `CI` |
+| Security hygiene | `0` exposed secrets, `0` high CodeQL/Dependency alerts | GitHub CodeQL, Gitleaks (`secret-scan.yml`), and Dependency Review |
+
+---
+
+## 11. Risks, Assumptions & Open Questions
+
+| Item | Impact | Mitigation / Status |
+|---|---|---|
+| **Acoustic foam attenuation in whitewater rapids** | High | Hardware spec recommends pairing 40 kHz JSN-SR04T with 24 GHz FMCW radar transducers |
+| **Unvalidated & unthrottled `/api/telegram` route** | Medium | Current route accepts raw JSON without Zod schema or IP rate limiting; tracked as priority hardening task before sharing server bot credentials |
+| **Large client component (`playground/page.tsx` at 1,795 lines)** | Low (maintainability) | Functional in v1; slated for extraction into `components/features/` + `hooks/` + Vitest unit tests |
+| **Terrestrial LoRa canyon shadowing (> 10 km)** | Medium | Multi-hop P2P relaying across `N01–N05`; direct-to-satellite LoRa-FHSS planned for v2 |
+
+---
+
+## 12. v2 Candidates
+
+- **Modularization & Automated Test Suite** — split `src/app/playground/page.tsx` into focused feature modules, add Vitest unit/API integration tests for Kalman/Dijkstra/`/api/telegram` (with Zod + rate limit), and add Playwright + `@axe-core/playwright` E2E smoke checks.
+- **2D Shallow-Water WebGPU Solver** — ingest 1-meter LiDAR DEM bathymetry for street-level velocity vectors.
+- **Spatio-Temporal Graph Neural Network (ST-GNN)** — fuse IMD Doppler weather radar rasters for 24-hour multi-tributary forecasting.
+- **Direct-to-Satellite LoRa-FHSS Uplink** — resilient NTN backhaul for headwater stations during simultaneous 4G and terrestrial LoRa failures.
 
 ---
 
