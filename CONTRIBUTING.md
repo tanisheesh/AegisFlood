@@ -22,9 +22,9 @@ Full instructions are in [docs/SETUP.md](docs/SETUP.md). Short version:
 ```bash
 git clone https://github.com/tanisheesh/AegisFlood
 cd AegisFlood
-npm install
+pnpm install --frozen-lockfile
 cp .env.example .env.local
-npm run dev
+pnpm run dev
 ```
 
 ---
@@ -41,14 +41,16 @@ npm run dev
    | `chore/` | tooling, config, dependencies |
    | `refactor/` | code change with no behaviour change |
 
-2. **Make your change.** Keep it focused, one feature or fix per PR.
+2. **Make your change.** Keep it focused, one feature or fix per PR, following [`AGENTS.md`](AGENTS.md).
 3. **Check it locally** before pushing:
 
    ```bash
-   npm run typecheck && npm run build
+   pnpm run typecheck && pnpm run build
    ```
 
-4. **Open a pull request** against `main`. The PR template will guide you.
+   *(CI also runs `lint`, `format:check`, `test`, and `test:e2e` automatically when configured in `package.json`.)*
+
+4. **Open a pull request** against `main`. Use a clean **past-tense** PR title (e.g. `Added CSV telemetry export`). The PR template will guide you.
 
 ---
 
@@ -68,9 +70,9 @@ Commits follow an emoji-prefixed format:
 | ♻️ | Refactor | `♻️ extract kinematic wave solver module` |
 | 📚 | Docs | `📚 add deploy guide` |
 | 🧪 | Tests | `🧪 cover submerged bridge edge pruning` |
-| 🔨 | Chore / config | `🔨 bump node to 22 in ci` |
+| 🔨 | Chore / config | `🔨 migrate package manager from npm to pnpm` |
 | 👆 | Dependency update | `👆 upgrade next to 16.4` |
-| 🔒 | Security | `🔒 sanitize telegram webhook payload` |
+| 🔒 | Security | `🔒 add http security headers in vercel config` |
 | 💀 | Code deletion | `💀 remove unused legacy route` |
 
 Breaking changes add a line `🚨 BREAKING CHANGE: <what breaks>` in the commit body.
@@ -79,10 +81,10 @@ Breaking changes add a line `🚨 BREAKING CHANGE: <what breaks>` in the commit 
 
 ## Code style
 
-- Run `npm run typecheck && npm run build` before committing. CI runs the same checks.
-- Follow the existing file structure and patterns.
-- TypeScript: `kebab-case` file names, `camelCase` variables and functions, `PascalCase` components and interfaces.
-- No secrets in code. Use env vars and add new ones to `.env.example`.
+- Run `pnpm run typecheck && pnpm run build` before committing. CI runs the same checks.
+- Follow the conventions in [`AGENTS.md`](AGENTS.md) and existing project patterns.
+- TypeScript: `kebab-case` file names (except App Router conventions), `camelCase` variables and functions, `PascalCase` components and interfaces.
+- No secrets in code. Use env vars and add new ones to `.env.example` with empty values.
 - Update docs when behaviour, setup or env vars change.
 
 ---
@@ -90,8 +92,8 @@ Breaking changes add a line `🚨 BREAKING CHANGE: <what breaks>` in the commit 
 ## Pull request checklist
 
 - [ ] Branch is up to date with `main`
-- [ ] `npm run typecheck` and `npm run build` pass locally
-- [ ] Commits follow the format above
+- [ ] Typecheck, build, and any configured lint/test checks pass locally
+- [ ] Commits follow the format above and PR title is plain-English past tense
 - [ ] Docs / `.env.example` / `CHANGELOG.md` updated if needed
 - [ ] PR description explains **what** and **why**
 

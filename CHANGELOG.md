@@ -4,6 +4,22 @@ All notable changes to **AegisFlood** are documented here.
 
 ---
 
+## [Unreleased]
+
+### 🔒 Security
+- Added baseline HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`) in `vercel.json`
+- Upgraded CI/CD security scanning with CodeQL (`codeql.yml`), Gitleaks (`secret-scan.yml`), Dependency Review (`dependency-review.yml`), and Renovate automated dependency/OSV patching
+
+### 🔨 Changed & Docs
+- Migrated package management and verification workflows from npm to `pnpm`
+- Added runtime `AGENTS.md` engineering contract, `.coderabbit.yaml`, `CODEOWNERS`, and `labeler.yml`
+- Upgraded `README.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/SETUP.md`, and `docs/DEPLOY.md` to full v2 specification depth
+
+### 👆 Dependencies
+- Updated GitHub Actions and minor/patch npm dependencies (`b437179`, `4858582`)
+
+---
+
 ## [1.0.0] — 2026-11-03
 
 ### ✨ Added
@@ -17,6 +33,7 @@ All notable changes to **AegisFlood** are documented here.
 
 ---
 
+[Unreleased]: https://github.com/tanisheesh/AegisFlood/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/tanisheesh/AegisFlood/releases/tag/v1.0.0
 
 ---

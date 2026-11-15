@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Only the latest version on `main` (and the live deployment at https://aegisflood.tanisheesh.in) receives security fixes.
+Only the latest version on `main` (and the live deployment at [https://aegisflood.tanisheesh.in](https://aegisflood.tanisheesh.in)) receives security fixes.
 
 | Version | Supported |
 |---|---|
@@ -46,8 +46,8 @@ You'll be kept updated throughout, and credited in the release notes once it's f
 **In scope**
 
 - This repository's source code
-- The live deployment at https://aegisflood.tanisheesh.in
-- Server API routes (`/api/telegram`) and input handling
+- The live deployment at [https://aegisflood.tanisheesh.in](https://aegisflood.tanisheesh.in)
+- Server API route handling (`/api/telegram`), credential isolation, and HTTP security header configuration
 
 **Out of scope**
 
