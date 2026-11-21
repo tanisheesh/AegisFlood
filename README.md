@@ -38,6 +38,12 @@ Single-point water-level float switches and raw ultrasonic gauges trigger only a
 
 ---
 
+## Demo
+
+https://github.com/user-attachments/assets/a2830d12-ca8e-4b35-bd40-76b5b805854b
+
+---
+
 ## What you get
 
 - **5-Node River Basin Digital Twin & Kinematic Wave Stage** — interactive 58.0 km river cascade (`Devprayag` → `Tapovan` → `Rishikesh` → `Haridwar` → `Roorkee`) with real-time inundation hazard radii, soil-moisture runoff amplification ($C_r \in [1.0, 1.6]$), and `+15m` to `+120m` flood crest forecasting.
