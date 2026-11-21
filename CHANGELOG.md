@@ -8,7 +8,7 @@ All notable changes to **AegisFlood** are documented here.
 
 ### ✨ Added
 - Added stateless health probe endpoint `GET /api/health`
-- Added 4-layer automated test and quality suite: Biome (`lint` + `format:check`), `23` Vitest unit & API integration tests (`tests/unit/`, `tests/integration/`), and `12` Playwright E2E + `@axe-core/playwright` WCAG 2.1 AA checks across desktop (`1280px`) and mobile (`375px`)
+- Added 4-layer automated test and quality suite: Biome (`lint` + `format:check`), `25` Vitest unit & API integration tests (`tests/unit/`, `tests/integration/`), and `12` Playwright E2E + `@axe-core/playwright` WCAG 2.1 AA checks across desktop (`1280px`) and mobile (`375px`)
 - Added `NEXT_PUBLIC_SITE_URL` origin resolution (`src/lib/site-config.ts`) across metadata, `robots.ts`, and `sitemap.ts`
 
 ### 🔒 Security

@@ -113,7 +113,8 @@ curl -s -o /dev/null -w "invalid token -> %{http_code}\n" -X POST https://aegisf
 
 | Incident | Immediate Action |
 |---|---|
-| **Telegram API `502` / `504` / `429` errors** | Verify `TELEGRAM_BOT_TOKEN` via `@BotFather`; if automated traffic triggers `429` against shared server env vars, clear server env vars in Vercel and redeploy (falling back to user-supplied tokens or `SIMULATED_CAP_BROADCAST`) |
+| **Application `429 RATE_LIMITED` burst** | Stop automated requests from the triggering client IP and wait for the `Retry-After` window (`60s` sliding window, `10 req/60s`). Do not clear server credentials for app rate limits — rate limiting executes before credentials are read |
+| **Telegram API `502` / `504` errors** | Verify `TELEGRAM_BOT_TOKEN` via `@BotFather` (`/token`), confirm target user/channel `/start` access, and check `api.telegram.org` availability (outbound timeout is `10s`) |
 | **Suspected token leak (`TELEGRAM_BOT_TOKEN`)** | Revoke token immediately in `@BotFather` (`/revoke`), rotate Vercel env var, redeploy, and verify Gitleaks + GitHub Secret Scanning clear |
 | **Vercel build failure** | Inspect Vercel build logs; reproduce locally with `pnpm install --frozen-lockfile && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm test` |
 

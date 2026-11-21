@@ -142,7 +142,7 @@ Single-point water-level float switches and raw ultrasonic flood alarms fail in 
 |---|---|---|
 | Debris spike false-alarm rejection | `100%` of single-tick spikes `> 0.45 m` attenuated without false `CRITICAL` | Vitest `hydrology-engine.test.ts` + Playwright oscilloscope assertion |
 | Downstream forecast lead time | `4–90 min` advance `ETA TO DANGER` on downstream nodes after headwater surge | Multi-horizon strip (`+15m`..`+120m`) & unit test assertions |
-| Quality & regression gates | `0` Biome lint/format errors, `0` TS errors, `23` Vitest + `12` Playwright/a11y passing | GitHub Actions `CI` (`lint`, `format:check`, `typecheck`, `build`, `test`, `test:e2e`) |
+| Quality & regression gates | `0` Biome lint/format errors, `0` TS errors, `25` Vitest + `12` Playwright/a11y passing | GitHub Actions `CI` (`lint`, `format:check`, `typecheck`, `build`, `test`, `test:e2e`) |
 | Security hygiene | `0` exposed secrets, `0` high CodeQL/Dependency alerts | GitHub CodeQL, Gitleaks (`secret-scan.yml`), and Dependency Review |
 
 ---

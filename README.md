@@ -56,7 +56,7 @@ Single-point water-level float switches and raw ultrasonic gauges trigger only a
 | Evacuation graph $G(V, E)$ | `13` vertices (`4` zones, `6` junctions, `3` shelters) · `17` edges | [`src/lib/road-graph-config.ts`](src/lib/road-graph-config.ts) |
 | Edge submergence pruning | `3.2×` weight within `0.65 m` of flood · `w(e) = ∞` at submerge | [`src/lib/dijkstra-router.ts`](src/lib/dijkstra-router.ts) |
 | Alert API guardrails | Zod validation · `4,096`-char cap · `10 req/60s` IP limit · `10s` timeout | [`src/lib/telegram-schema.ts`](src/lib/telegram-schema.ts) |
-| Automated test suite | `23` Vitest unit/API tests + `12` Playwright E2E & WCAG AA checks | [`tests/`](tests/) |
+| Automated test suite | `25` Vitest unit/API tests + `12` Playwright E2E & WCAG AA checks | [`tests/`](tests/) |
 | Edge hardware radio & power | `865 MHz` LoRa (`168 dB`, `+20 dBm`, `< 200 ms` failover) · `14–18d` autonomy | [`src/lib/firmware-spec.ts`](src/lib/firmware-spec.ts) |
 
 ---

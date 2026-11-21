@@ -79,7 +79,7 @@ pnpm run lint          # biome lint
 pnpm run format:check  # biome format
 pnpm run typecheck     # tsc --noEmit
 pnpm run build         # next build (Turbopack)
-pnpm test              # vitest run (23 unit + API integration tests)
+pnpm test              # vitest run (25 unit + API integration tests)
 pnpm run test:e2e      # playwright test (12 desktop/mobile smoke + WCAG AA a11y checks)
 ```
 
