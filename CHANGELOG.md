@@ -6,16 +6,24 @@ All notable changes to **AegisFlood** are documented here.
 
 ## [Unreleased]
 
+### ✨ Added
+- Added stateless health probe endpoint `GET /api/health`
+- Added 4-layer automated test and quality suite: Biome (`lint` + `format:check`), `23` Vitest unit & API integration tests (`tests/unit/`, `tests/integration/`), and `12` Playwright E2E + `@axe-core/playwright` WCAG 2.1 AA checks across desktop (`1280px`) and mobile (`375px`)
+- Added `NEXT_PUBLIC_SITE_URL` origin resolution (`src/lib/site-config.ts`) across metadata, `robots.ts`, and `sitemap.ts`
+
 ### 🔒 Security
+- Hardened `POST /api/telegram` with Zod boundary validation (`src/lib/telegram-schema.ts`), `4,096`-char message cap, sliding-window IP rate limiting (`10 req/60s` → `429`), `10s` `AbortSignal.timeout` (`504`), and sanitized upstream error mapping (`502`)
 - Added baseline HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`) in `vercel.json`
 - Upgraded CI/CD security scanning with CodeQL (`codeql.yml`), Gitleaks (`secret-scan.yml`), Dependency Review (`dependency-review.yml`), and Renovate automated dependency/OSV patching
 
-### 🔨 Changed & Docs
+### ♻️ Changed
+- Decomposed monolithic `playground/page.tsx` (`1,795` lines → `110` lines) and `aegisflood-data.ts` (`724` lines → `40` lines) into cohesive `< 300`-line modules across `src/lib/`, `src/hooks/`, `src/components/ui/`, and `src/components/features/`
+- Improved WCAG 2.1 AA accessibility across all 4 routes (`:focus-visible` rings, form `<label>` associations, contrast upgrades, keyboard-accessible scrollable regions, and zero severe `axe-core` violations)
+- Pinned `renovatebot/github-action@v46.3.14` in `.github/workflows/renovate.yml` to resolve missing floating `v46` tag
 - Migrated package management and verification workflows from npm to `pnpm`
-- Added runtime `AGENTS.md` engineering contract, `.coderabbit.yaml`, `CODEOWNERS`, and `labeler.yml`
-- Upgraded `README.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/SETUP.md`, and `docs/DEPLOY.md` to full v2 specification depth
 
 ### 👆 Dependencies
+- Added `zod`, `@biomejs/biome`, `vitest`, `@playwright/test`, and `@axe-core/playwright`
 - Updated GitHub Actions and minor/patch npm dependencies (`b437179`, `4858582`)
 
 ---
@@ -43,7 +51,7 @@ All notable changes to **AegisFlood** are documented here.
 <h3>Tanish Poddar</h3>
 
 <a href="https://tanisheesh.in"><img src="https://img.shields.io/badge/Website-tanisheesh.in-111111?style=flat-square&logo=googlechrome&logoColor=white" alt="Website"></a>
-<a href="https://linkedin.com/in/tanisheesh"><img src="https://img.shields.io/badge/LinkedIn-tanisheesh-0A66C2?style=flat-square" alt="LinkedIn"></a>
+<a href="https://linkedin.com/in/tanisheesh"><img src="https://img.shields.io/badge/LinkedIn-tanisheesh-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
 <a href="https://github.com/tanisheesh"><img src="https://img.shields.io/badge/GitHub-tanisheesh-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub"></a>
 <a href="mailto:hi@tanisheesh.in"><img src="https://img.shields.io/badge/Email-hi%40tanisheesh.in-EA4335?style=flat-square&logo=gmail&logoColor=white" alt="Email"></a>
 

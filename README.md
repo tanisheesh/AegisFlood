@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://aegisflood.tanisheesh.in">
-    <img src="https://img.shields.io/badge/live_demo-FF4D00-FF4D00?style=flat-square" alt="Live Demo">
+    <img src="https://img.shields.io/badge/live_demo-visit-FF4D00?style=flat-square" alt="Live Demo">
   </a>
   <a href="https://github.com/tanisheesh/AegisFlood/actions/workflows/ci.yml">
     <img src="https://github.com/tanisheesh/AegisFlood/actions/workflows/ci.yml/badge.svg" alt="CI">
@@ -43,7 +43,7 @@ Single-point water-level float switches and raw ultrasonic gauges trigger only a
 - **5-Node River Basin Digital Twin & Kinematic Wave Stage** — interactive 58.0 km river cascade (`Devprayag` → `Tapovan` → `Rishikesh` → `Haridwar` → `Roorkee`) with real-time inundation hazard radii, soil-moisture runoff amplification ($C_r \in [1.0, 1.6]$), and `+15m` to `+120m` flood crest forecasting.
 - **In-Browser ESP32-S3 Kalman Firmware Patcher & Dual-Trace Oscilloscope** — live-tune `KALMAN_Q`, `KALMAN_R`, and `INNOVATION_GATE_M`, inject `+1.85 m to +2.30 m` floating-timber sonar spikes, and watch the dual-trace oscilloscope (`CH1: RAW_SONAR`, `CH2: KALMAN_TRUE`, `CH3: +60M_FORECAST`) reject hardware glitches with one-click `.CSV` / `.JSON` blackbox export.
 - **Dynamic Dijkstra Safe Evacuation Router on Graph $G(V, E)$** — continuously evaluates 17 community road segments across 13 waypoints against filtered river stages, applying a $3.2\times$ risk penalty near flooding, pruning submerged bridges ($w(e) = \infty$), and rerouting 4 floodplain zones (`V1–V4`) to high-ground NDRF shelters (`S1–S3`).
-- **Node Interconnect Schematic, Telecom Fault Injector & CAP/Telegram Dispatcher** — inspect the ESP32-S3 + SX1276 865 MHz LoRa + MPPT LiFePO4 schematic, simulate 4G cellular blackouts with P2P LoRa mesh failover, download the `.ino` firmware, and dispatch ITU-T CAP v1.2 / live Telegram Bot emergency bulletins.
+- **Node Interconnect Schematic, Telecom Fault Injector & Hardened CAP/Telegram API** — inspect the ESP32-S3 + SX1276 865 MHz LoRa + MPPT LiFePO4 schematic, simulate 4G cellular blackouts with P2P LoRa mesh failover, download the `.ino` firmware, and dispatch Zod-validated, rate-limited ITU-T CAP v1.2 / Telegram Bot bulletins (`/api/telegram`).
 
 ---
 
@@ -51,13 +51,13 @@ Single-point water-level float switches and raw ultrasonic gauges trigger only a
 
 | Metric | Value | Source |
 |---|---|---|
-| River cascade span | `58.0 km` across `5` gauge stations (`830 m` → `268 m` ASL) | [`src/lib/aegisflood-data.ts`](src/lib/aegisflood-data.ts) |
-| Kalman innovation gate | `\|r_k\| > 0.45 m` ($3.8\sigma$) → `65×` noise covariance inflation | [`src/lib/aegisflood-data.ts`](src/lib/aegisflood-data.ts) |
-| Forecast horizons | `+15m`, `+30m`, `+60m`, `+120m` + ETA-to-Danger (`4–90 min`) | [`src/app/playground/page.tsx`](src/app/playground/page.tsx) |
-| Evacuation graph $G(V, E)$ | `13` vertices (`4` zones, `6` junctions, `3` shelters) · `17` edges | [`src/lib/aegisflood-data.ts`](src/lib/aegisflood-data.ts) |
-| Edge submergence pruning | `3.2×` weight within `0.65 m` of flood · `w(e) = ∞` at submerge | [`src/lib/aegisflood-data.ts`](src/lib/aegisflood-data.ts) |
-| Oscilloscope ring buffer | `30` pre-warmed samples · `50`-sample rolling window (`.CSV`/`.JSON`) | [`src/app/playground/page.tsx`](src/app/playground/page.tsx) |
-| Edge hardware radio & power | `865 MHz` LoRa (`168 dB`, `+20 dBm`, `< 200 ms` failover) · `14–18d` autonomy | [`src/lib/aegisflood-data.ts`](src/lib/aegisflood-data.ts) |
+| River cascade span | `58.0 km` across `5` gauge stations (`830 m` → `268 m` ASL) | [`src/lib/basin-config.ts`](src/lib/basin-config.ts) |
+| Kalman innovation gate | `\|r_k\| > 0.45 m` ($3.8\sigma$) → `65×` noise covariance inflation | [`src/lib/hydrology-engine.ts`](src/lib/hydrology-engine.ts) |
+| Evacuation graph $G(V, E)$ | `13` vertices (`4` zones, `6` junctions, `3` shelters) · `17` edges | [`src/lib/road-graph-config.ts`](src/lib/road-graph-config.ts) |
+| Edge submergence pruning | `3.2×` weight within `0.65 m` of flood · `w(e) = ∞` at submerge | [`src/lib/dijkstra-router.ts`](src/lib/dijkstra-router.ts) |
+| Alert API guardrails | Zod validation · `4,096`-char cap · `10 req/60s` IP limit · `10s` timeout | [`src/lib/telegram-schema.ts`](src/lib/telegram-schema.ts) |
+| Automated test suite | `23` Vitest unit/API tests + `12` Playwright E2E & WCAG AA checks | [`tests/`](tests/) |
+| Edge hardware radio & power | `865 MHz` LoRa (`168 dB`, `+20 dBm`, `< 200 ms` failover) · `14–18d` autonomy | [`src/lib/firmware-spec.ts`](src/lib/firmware-spec.ts) |
 
 ---
 
@@ -65,11 +65,11 @@ Single-point water-level float switches and raw ultrasonic gauges trigger only a
 
 | Layer | Tech |
 |---|---|
-| Frontend & Digital Twin | Next.js 16.4 (App Router) · React 19.3 · TypeScript 7 · Tailwind CSS 4 · Interactive SVG Canvas |
-| Telemetry & Alert API | Next.js Serverless API (`/api/telegram`) · Web Audio API Siren Synth · Dual-Trace Oscilloscope |
+| Frontend & Digital Twin | Next.js 16.4 (App Router) · React 19.3 · TypeScript 7 · Tailwind CSS 4 · `lucide-react` · SVG Canvas |
+| API & Validation | Next.js Route Handlers (`/api/telegram`, `/api/health`) · Zod 4 · Sliding-Window Rate Limiter |
 | Edge Node Firmware | C/C++ (`WiFi.h`, `PubSubClient.h`, `SPI.h`, `LoRa.h`) · ESP32-S3 (`240 MHz`) · 1D Kalman + Innovation Gate |
-| Sensing & Backhaul | JSN-SR04T / 24 GHz Radar · Tipping-Bucket Rain ISR · Capacitive Soil ADC · SX1276 865 MHz LoRa + 4G MQTT |
-| Infra & Automation | Vercel (`aegisflood.tanisheesh.in`) · pnpm · GitHub Actions CI · CodeQL · Gitleaks · Renovate |
+| Quality & Testing | Biome 2 (`lint` & `format:check`) · Vitest 5 · Playwright + `@axe-core/playwright` (Desktop + Mobile WCAG AA) |
+| Infra & Security | Vercel (`aegisflood.tanisheesh.in`) · pnpm 10 · GitHub Actions CI · CodeQL · Gitleaks · Renovate |
 
 ---
 
@@ -84,8 +84,8 @@ Downstream flooding is governed by upstream discharge travel time ($c_k = \frac{
 **Why model community evacuation on a dynamic weighted graph $G(V, E)$ instead of static routes?**
 Shortest paths from riverside settlements typically cross low-elevation suspension bridges or causeways that submerge first. Binding graph edge weights directly to real-time node water stages ($w(e) = \infty$ when $h \ge H_{\text{submerge}}$) ensures Dijkstra's algorithm automatically reroutes evacuees onto elevated highway bypasses.
 
-**What would you do differently in v2?**
-Upgrade the 1D cross-sectional Saint-Venant solver to a 2D shallow-water GPU solver over 1-meter LiDAR Digital Elevation Models (DEM), decompose the monolithic playground view into modular hooks/components with automated Vitest + Playwright coverage, and add direct-to-satellite LoRa-FHSS fallback on headwater nodes.
+**What would you improve next?**
+Upgrade the 1D cross-sectional Saint-Venant solver to a 2D shallow-water WebGPU solver over 1-meter LiDAR Digital Elevation Models (DEM), fuse 77 GHz radar with vented piezometers against rapid foam scattering, and add direct-to-satellite LoRa-FHSS fallback on headwater nodes.
 
 ---
 
@@ -96,7 +96,7 @@ Upgrade the 1D cross-sectional Saint-Venant solver to a 2D shallow-water GPU sol
 | [PRD](docs/PRD.md) | Product requirements — quantified impact, acceptance criteria, edge cases, quota math |
 | [Architecture](docs/ARCHITECTURE.md) | System topology (Mermaid), hydrological/Kalman/Dijkstra internals, API contracts, scale ceilings |
 | [Decisions](docs/DECISIONS.md) | Technical ADRs — comparison matrices, tradeoffs, and reversal triggers |
-| [Setup](docs/SETUP.md) | Local dev onboarding, env var matrix, ESP32-S3 flashing, and troubleshooting |
+| [Setup](docs/SETUP.md) | Local dev onboarding, env var matrix, ESP32-S3 flashing, verification & troubleshooting |
 | [Deploy](docs/DEPLOY.md) | Vercel topology, security headers, smoke verification, and incident runbooks |
 | [Contributing](CONTRIBUTING.md) | Branching, emoji commit style, and PR checklist |
 | [Changelog](CHANGELOG.md) | Release history mapped to commit history |
@@ -109,7 +109,7 @@ Upgrade the 1D cross-sectional Saint-Venant solver to a 2D shallow-water GPU sol
 <h3>Tanish Poddar</h3>
 
 <a href="https://tanisheesh.in"><img src="https://img.shields.io/badge/Website-tanisheesh.in-111111?style=flat-square&logo=googlechrome&logoColor=white" alt="Website"></a>
-<a href="https://linkedin.com/in/tanisheesh"><img src="https://img.shields.io/badge/LinkedIn-tanisheesh-0A66C2?style=flat-square" alt="LinkedIn"></a>
+<a href="https://linkedin.com/in/tanisheesh"><img src="https://img.shields.io/badge/LinkedIn-tanisheesh-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
 <a href="https://github.com/tanisheesh"><img src="https://img.shields.io/badge/GitHub-tanisheesh-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub"></a>
 <a href="mailto:hi@tanisheesh.in"><img src="https://img.shields.io/badge/Email-hi%40tanisheesh.in-EA4335?style=flat-square&logo=gmail&logoColor=white" alt="Email"></a>
 

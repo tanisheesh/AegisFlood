@@ -35,7 +35,7 @@
 | Split FastAPI + WebSocket Backend (Render) | `50–200 ms` RTT + `30–50 s` cold start | `$0` (sleeps) or `$7+/mo` | High (CORS, reconnects, dual deploys) | ❌ Rejected |
 | Next.js Server Polling (`POST /api/tick`) | `80–250 ms` RTT per tick | Higher Vercel function GB-hrs | Medium (needs Redis state store) | ❌ Rejected |
 
-**Decision & Reason:** Embed the 1D Saint-Venant kinematic wave queue, Manning equations, 1D Kalman estimator, and Dijkstra solver directly in TypeScript inside Next.js 16, reserving server execution strictly for `POST /api/telegram`. Visitors experience zero cold starts and instant slider/patch responsiveness.
+**Decision & Reason:** Embed the 1D Saint-Venant kinematic wave queue, Manning equations, 1D Kalman estimator, and Dijkstra solver directly in pure TypeScript modules (`src/lib/`) inside Next.js 16, reserving server execution strictly for `POST /api/telegram` and `GET /api/health`. Visitors experience zero cold starts and instant slider/patch responsiveness.
 
 **Tradeoff Accepted:** Simulation state is isolated per browser tab rather than shared across multiple simultaneous operators.
 
@@ -51,11 +51,11 @@
 
 | Option | Submergence Awareness | Recompute Latency | Implementation Scope | Verdict |
 |---|---|---|---|---|
-| **Dynamic Dijkstra $O(\|V\|^2)$ on $G(V, E)$** | Live edge pruning (`w = ∞`) + `3.2×` proximity penalty | `< 1 ms` (`13` nodes, `17` edges) | ~110 lines pure TS | ✅ **Chosen** |
+| **Dynamic Dijkstra $O(\|V\|^2)$ on $G(V, E)$** | Live edge pruning (`w = ∞`) + `3.2×` proximity penalty | `< 1 ms` (`13` nodes, `17` edges) | ~160 lines pure TS (`dijkstra-router.ts`) | ✅ **Chosen** |
 | Static Pre-Computed Shortest Path / PDF | None (routes onto flooded bridges) | `0 ms` | Static asset | ❌ Rejected |
 | Binary-Heap A* with Geo-Heuristics | Live edge pruning | `< 1 ms` (overkill for `13` nodes) | Higher complexity | ❌ Rejected |
 
-**Decision & Reason:** Model `4` settlements (`V1–V4`), `6` junctions (`J1–J6`), and `3` elevated NDRF shelters (`S1–S3`) across `17` edges (`E01–E17`), binding vulnerable bridges directly to upstream sensor stages (`NODE-01`–`NODE-04`). Recomputing shortest paths on every simulation tick guarantees CAP/Telegram alerts always guide residents onto passable upland bypasses.
+**Decision & Reason:** Model `4` settlements (`V1–V4`), `6` junctions (`J1–J6`), and `3` elevated NDRF shelters (`S1–S3`) across `17` edges (`E01–E17`), binding vulnerable bridges directly to upstream sensor stages (`NODE-01`–`NODE-04`). Recomputing shortest paths dynamically guarantees CAP/Telegram alerts always guide residents onto passable upland bypasses and flag isolated zones requiring airlift.
 
 **Tradeoff Accepted:** Requires pre-surveying bridge deck submergence thresholds (`submergeLevelM`) for each monitored sector.
 
@@ -83,16 +83,35 @@
 
 ---
 
-## What I'd do differently in v2
+## ADR-05 — Biome 2 over ESLint + Prettier for TypeScript 7 Tooling
 
-- **Modularize the workbench & add 4-layer test coverage** — split the `1,795`-line `src/app/playground/page.tsx` into `components/features/` + `hooks/`, extract a pure Kalman/kinematic simulation module, enforce Zod + rate limiting on `/api/telegram`, and add Vitest + Playwright/`@axe-core/playwright` gates.
-- **2D Shallow-Water WebGPU Solver** — replace 1D cross-sectional channel interpolation with 1-meter LiDAR DEM terrain tiles for street-level velocity vectors.
-- **Dual-Sensor Stage Fusion (77 GHz Radar + Vented Piezometer)** — fuse non-contact millimeter-wave radar with submerged hydrostatic pressure to eliminate rapid foam scattering.
-- **Spatio-Temporal GNN Forecasting** — train a Graph Attention Network over IMD Doppler radar rasters and CWC gauge time series for 24-hour multi-tributary lead times.
+**Context:** AegisFlood runs TypeScript `7.0.2`, which is incompatible with `typescript-eslint@8.x` (hard runtime error on TS 7.0) and requires hundreds of transitive ESLint/Prettier packages.
+
+### Options Considered
+
+| Option | TS 7.0 Support | Lint + Format Speed | Dependency Footprint | Verdict |
+|---|---|---|---|---|
+| **Biome `2.6.8` (`lint` + `format:check`)** | Native TS 7 / React 19 / Tailwind CSS 4 | `< 100 ms` across 53 files | `2` packages | ✅ **Chosen** |
+| ESLint + `eslint-config-next` + Prettier | Fails on TS 7.0 (`typescript-eslint` incompatible) | `2–5 s` | `300+` packages | ❌ Rejected |
+
+**Decision & Reason:** Adopt Biome `2.6.8` in `biome.json` for unified linting (`noDoubleEquals`, `noExplicitAny`, `noUnusedImports`, `useImportType`) and formatting (`pnpm run lint` and `pnpm run format:check`), running in under `100 ms` locally and in GitHub Actions CI.
+
+**Tradeoff Accepted:** Next.js-specific ESLint rules (`@next/eslint-plugin-next`) are not executed until `typescript-eslint` supports TS 7.x; mitigated by Next.js Turbopack build checks and Playwright smoke tests.
+
+**Reversal Trigger:** Re-evaluate adding Next.js-specific lint rules if custom App Router lint diagnostics become needed after `typescript-eslint` ships TS 7 support.
 
 ---
 
-## Explicit Non-Decisions (Deferred to v2)
+## What I'd improve next
+
+- **2D Shallow-Water WebGPU Solver** — replace 1D cross-sectional channel interpolation with 1-meter LiDAR DEM terrain tiles for street-level velocity vectors.
+- **Dual-Sensor Stage Fusion (77 GHz Radar + Vented Piezometer)** — fuse non-contact millimeter-wave radar with submerged hydrostatic pressure to eliminate rapid foam scattering.
+- **Spatio-Temporal GNN Forecasting** — train a Graph Attention Network over IMD Doppler radar rasters and CWC gauge time series for 24-hour multi-tributary lead times.
+- **Distributed Redis Rate Limiting** — upgrade `/api/telegram`'s per-isolate sliding-window rate limiter to Upstash Redis when connecting shared multi-region EOC deployments.
+
+---
+
+## Explicit Non-Decisions (Deferred)
 
 | Feature | Why Deferred | Trigger to Build |
 |---|---|---|
@@ -107,7 +126,7 @@
 <h3>Tanish Poddar</h3>
 
 <a href="https://tanisheesh.in"><img src="https://img.shields.io/badge/Website-tanisheesh.in-111111?style=flat-square&logo=googlechrome&logoColor=white" alt="Website"></a>
-<a href="https://linkedin.com/in/tanisheesh"><img src="https://img.shields.io/badge/LinkedIn-tanisheesh-0A66C2?style=flat-square" alt="LinkedIn"></a>
+<a href="https://linkedin.com/in/tanisheesh"><img src="https://img.shields.io/badge/LinkedIn-tanisheesh-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
 <a href="https://github.com/tanisheesh"><img src="https://img.shields.io/badge/GitHub-tanisheesh-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub"></a>
 <a href="mailto:hi@tanisheesh.in"><img src="https://img.shields.io/badge/Email-hi%40tanisheesh.in-EA4335?style=flat-square&logo=gmail&logoColor=white" alt="Email"></a>
 

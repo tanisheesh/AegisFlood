@@ -45,10 +45,8 @@ pnpm run dev
 3. **Check it locally** before pushing:
 
    ```bash
-   pnpm run typecheck && pnpm run build
+   pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm run build && pnpm test && pnpm run test:e2e
    ```
-
-   *(CI also runs `lint`, `format:check`, `test`, and `test:e2e` automatically when configured in `package.json`.)*
 
 4. **Open a pull request** against `main`. Use a clean **past-tense** PR title (e.g. `Added CSV telemetry export`). The PR template will guide you.
 
@@ -81,7 +79,7 @@ Breaking changes add a line `🚨 BREAKING CHANGE: <what breaks>` in the commit 
 
 ## Code style
 
-- Run `pnpm run typecheck && pnpm run build` before committing. CI runs the same checks.
+- Run `pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm run build && pnpm test` before committing. CI runs the same checks plus Playwright E2E.
 - Follow the conventions in [`AGENTS.md`](AGENTS.md) and existing project patterns.
 - TypeScript: `kebab-case` file names (except App Router conventions), `camelCase` variables and functions, `PascalCase` components and interfaces.
 - No secrets in code. Use env vars and add new ones to `.env.example` with empty values.
