@@ -5,6 +5,7 @@ import {
   isValidTelegramChatId,
   isValidTelegramToken,
   TELEGRAM_FETCH_TIMEOUT_MS,
+  telegramApiResponseSchema,
   telegramDispatchSchema,
 } from "@/lib/telegram-schema";
 
@@ -107,22 +108,27 @@ export async function POST(req: Request) {
       signal: AbortSignal.timeout(TELEGRAM_FETCH_TIMEOUT_MS),
     });
 
-    let upstreamDescription = `HTTP ${resp.status}`;
+    let parsedEnvelope: { ok: boolean; description?: string } | null = null;
     try {
-      const data: unknown = await resp.json();
-      if (
-        typeof data === "object" &&
-        data !== null &&
-        "description" in data &&
-        typeof (data as { description: unknown }).description === "string"
-      ) {
-        upstreamDescription = (data as { description: string }).description;
+      const rawData: unknown = await resp.json();
+      const validated = telegramApiResponseSchema.safeParse(rawData);
+      if (validated.success) {
+        parsedEnvelope = validated.data;
       }
-    } catch {
-      upstreamDescription = `HTTP ${resp.status}`;
+    } catch (parseErr) {
+      if (
+        parseErr instanceof Error &&
+        (parseErr.name === "TimeoutError" || parseErr.name === "AbortError")
+      ) {
+        throw parseErr;
+      }
+      parsedEnvelope = null;
     }
 
-    if (!resp.ok) {
+    if (!resp.ok || !parsedEnvelope?.ok) {
+      const upstreamDescription =
+        parsedEnvelope?.description ??
+        (resp.ok ? "Malformed Telegram Bot API response." : `HTTP ${resp.status}`);
       return NextResponse.json(
         {
           ok: false,

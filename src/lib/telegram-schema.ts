@@ -41,6 +41,11 @@ export const telegramDispatchSchema = z.object({
 
 export type TelegramDispatchInput = z.infer<typeof telegramDispatchSchema>;
 
+export const telegramApiResponseSchema = z.object({
+  ok: z.boolean(),
+  description: z.string().optional(),
+});
+
 export function isValidTelegramToken(token: string): boolean {
   return BOT_TOKEN_PATTERN.test(token);
 }

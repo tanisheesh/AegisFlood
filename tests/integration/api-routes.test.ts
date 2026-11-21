@@ -151,6 +151,57 @@ describe("POST /api/telegram", () => {
     expect(data.mode).toBe("TELEGRAM_TIMEOUT");
   });
 
+  it("returns 502 TELEGRAM_API_ERROR when HTTP 200 envelope has ok: false or malformed JSON", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: false, description: "dispatch failed" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const failedEnvelopeRes = await postTelegram(
+      makeJsonRequest(
+        { botToken: VALID_TOKEN, chatId: VALID_CHAT_ID, message: "ENVELOPE_FAIL" },
+        "203.0.113.16",
+      ),
+    );
+    expect(failedEnvelopeRes.status).toBe(502);
+    const failedBody = await failedEnvelopeRes.json();
+    expect(failedBody.mode).toBe("TELEGRAM_API_ERROR");
+    expect(failedBody.detail).toBe("dispatch failed");
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response("not-json", { status: 200, headers: { "Content-Type": "text/plain" } }),
+    );
+    const malformedRes = await postTelegram(
+      makeJsonRequest(
+        { botToken: VALID_TOKEN, chatId: VALID_CHAT_ID, message: "MALFORMED_OK" },
+        "203.0.113.17",
+      ),
+    );
+    expect(malformedRes.status).toBe(502);
+    const malformedBody = await malformedRes.json();
+    expect(malformedBody.mode).toBe("TELEGRAM_API_ERROR");
+  });
+
+  it("returns 504 TELEGRAM_TIMEOUT when timeout fires while reading HTTP 200 response body", async () => {
+    const timeoutErr = new Error("Body read timed out");
+    timeoutErr.name = "TimeoutError";
+    const stalledResp = new Response("{}", { status: 200 });
+    vi.spyOn(stalledResp, "json").mockRejectedValue(timeoutErr);
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(stalledResp);
+
+    const res = await postTelegram(
+      makeJsonRequest(
+        { botToken: VALID_TOKEN, chatId: VALID_CHAT_ID, message: "BODY_TIMEOUT" },
+        "203.0.113.18",
+      ),
+    );
+    expect(res.status).toBe(504);
+    const data = await res.json();
+    expect(data.mode).toBe("TELEGRAM_TIMEOUT");
+  });
+
   it("returns 429 RATE_LIMITED with Retry-After once client exceeds window limit", async () => {
     const ip = "203.0.113.99";
     for (let i = 0; i < TELEGRAM_RATE_LIMIT_MAX; i++) {
