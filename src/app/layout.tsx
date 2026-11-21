@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { getSiteUrl } from "@/lib/site-config";
 import "./globals.css";
 
-const SITE_URL = "https://aegisflood.tanisheesh.in";
+const SITE_URL = getSiteUrl();
 
 export const viewport: Viewport = {
   width: "device-width",

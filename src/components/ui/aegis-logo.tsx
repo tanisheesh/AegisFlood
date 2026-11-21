@@ -1,0 +1,35 @@
+interface AegisFloodLogoProps {
+  size?: number;
+  className?: string;
+}
+
+export function AegisFloodLogo({ size = 30, className = "" }: AegisFloodLogoProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      className={`shrink-0 ${className}`.trim()}
+      aria-hidden="true"
+    >
+      <rect width="64" height="64" fill="#080808" />
+      <rect x="3" y="3" width="58" height="58" stroke="#FF4D00" strokeWidth="4" />
+      <circle cx="32" cy="18" r="5" fill="#FFB300" />
+      <path d="M22 25 L32 18 L42 25" stroke="#FFB300" strokeWidth="2.5" />
+      <path
+        d="M10 37 C17 31, 25 43, 32 37 C39 31, 47 43, 54 37"
+        stroke="#FF4D00"
+        strokeWidth="4"
+        fill="none"
+      />
+      <path
+        d="M10 48 C17 42, 25 54, 32 48 C39 42, 47 54, 54 48"
+        stroke="#00E676"
+        strokeWidth="4"
+        fill="none"
+      />
+    </svg>
+  );
+}

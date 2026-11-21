@@ -1,20 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import { Download } from "lucide-react";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
+import { useState } from "react";
+import { type NodeFaultType, NodeSchematic } from "@/components/features/node-schematic";
 import Footer from "@/components/footer";
+import Navbar from "@/components/navbar";
 import { FULL_ESP32_SKETCH, HARDWARE_MODULES } from "@/lib/aegisflood-data";
-
-type FaultType =
-  | "nominal"
-  | "debris_echo"
-  | "cellular_blackout"
-  | "lora_airtime"
-  | "solar_brownout";
+import { downloadTextFile } from "@/lib/file-export";
 
 const NODE_FAULTS: Record<
-  FaultType,
+  NodeFaultType,
   {
     code: string;
     label: string;
@@ -77,27 +73,24 @@ const NODE_FAULTS: Record<
 
 export default function NetworkPage() {
   const [selectedId, setSelectedId] = useState("esp32s3");
-  const [activeFault, setActiveFault] = useState<FaultType>("nominal");
+  const [activeFault, setActiveFault] = useState<NodeFaultType>("nominal");
   const [copied, setCopied] = useState(false);
 
-  const activeModule =
-    HARDWARE_MODULES.find((m) => m.id === selectedId) || HARDWARE_MODULES[0];
+  const activeModule = HARDWARE_MODULES.find((m) => m.id === selectedId) ?? HARDWARE_MODULES[0];
   const faultInfo = NODE_FAULTS[activeFault];
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(FULL_ESP32_SKETCH);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(FULL_ESP32_SKETCH);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
   };
 
   const handleDownloadIno = () => {
-    const blob = new Blob([FULL_ESP32_SKETCH], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "AegisFlood_ESP32S3_Edge_Kalman_Node.ino";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadTextFile("AegisFlood_ESP32S3_Edge_Kalman_Node.ino", FULL_ESP32_SKETCH, "text/plain");
   };
 
   return (
@@ -105,7 +98,6 @@ export default function NetworkPage() {
       <Navbar />
 
       <main className="flex-1 max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
-        {/* Page Header */}
         <div className="border border-[#222220] bg-[#0e0e0e] p-5 sm:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <div className="font-mono text-[11px] sm:text-xs text-[#ff4d00] uppercase tracking-widest mb-2">
@@ -120,8 +112,13 @@ export default function NetworkPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button onClick={handleDownloadIno} className="brutal-btn brutal-btn-primary">
-              ⬇ DOWNLOAD ESP32 .INO
+            <button
+              type="button"
+              onClick={handleDownloadIno}
+              className="brutal-btn brutal-btn-primary"
+            >
+              <Download className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+              DOWNLOAD ESP32 .INO
             </button>
             <Link href="/playground" className="brutal-btn">
               OPEN BASIN DIGITAL TWIN →
@@ -129,188 +126,9 @@ export default function NetworkPage() {
           </div>
         </div>
 
-        {/* Interactive Node Schematic + Fault Diagnosis Workbench */}
         <section className="grid grid-cols-1 lg:grid-cols-12 border border-[#222220] bg-[#0e0e0e]">
-          {/* Left 7 Cols: Interactive SVG Node Bus Schematic */}
-          <div className="lg:col-span-7 border-b lg:border-b-0 lg:border-r border-[#222220] flex flex-col">
-            <div className="panel-header">
-              <span>EDGE STATION INTERCONNECT SCHEMATIC // STAR GROUND &amp; SPI/ADC BUS</span>
-              <span className="text-[#ff4d00] font-bold">{faultInfo.code}</span>
-            </div>
+          <NodeSchematic activeFault={activeFault} faultCode={faultInfo.code} />
 
-            <div className="p-4 bg-[#080808] flex-1 flex items-center justify-center">
-              <svg
-                viewBox="0 0 760 400"
-                className="w-full h-auto max-h-[380px] border border-[#222220] bg-[#0b0b0a]"
-              >
-                {/* Power Subsystem Box */}
-                <rect
-                  x="25"
-                  y="30"
-                  width="195"
-                  height="95"
-                  fill="#121210"
-                  stroke={activeFault === "solar_brownout" ? "#ff2a2a" : "#ffb300"}
-                  strokeWidth="2"
-                />
-                <text x="38" y="55" fill="#ffb300" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
-                  MOD_05 // SOLAR MPPT + LiFePO4
-                </text>
-                <text x="38" y="75" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  20W Panel → 6.4V 6000mAh
-                </text>
-                <text x="38" y="93" fill="#88857e" fontSize="10" fontFamily="IBM Plex Mono">
-                  INA219 I2C · 5.0V &amp; 3.3V Rails
-                </text>
-                <text x="38" y="111" fill="#00e676" fontSize="10" fontFamily="IBM Plex Mono">
-                  TVS Surge + Star GND Bus
-                </text>
-
-                {/* Central ESP32-S3 Edge MCU */}
-                <rect
-                  x="275"
-                  y="110"
-                  width="210"
-                  height="175"
-                  fill="#161412"
-                  stroke="#ff4d00"
-                  strokeWidth="2.5"
-                />
-                <text x="292" y="138" fill="#ff4d00" fontSize="12" fontWeight="bold" fontFamily="IBM Plex Mono">
-                  MOD_01 // ESP32-S3 EDGE MCU
-                </text>
-                <text x="292" y="158" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  Dual-Core Xtensa LX7 @ 240MHz
-                </text>
-                <text x="292" y="180" fill="#00e676" fontSize="10" fontFamily="IBM Plex Mono">
-                  • 1D Kalman Filter (Q=0.008)
-                </text>
-                <text x="292" y="198" fill="#00e676" fontSize="10" fontFamily="IBM Plex Mono">
-                  • 3.8σ Innovation Gate (R×65)
-                </text>
-                <text x="292" y="216" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  • GPIO4/5: Sonar Trig/Echo
-                </text>
-                <text x="292" y="234" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  • GPIO19: Rain Tipping ISR
-                </text>
-                <text x="292" y="252" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  • GPIO34: Soil ADC1_CH6
-                </text>
-                <text x="292" y="270" fill="#ffb300" fontSize="10" fontFamily="IBM Plex Mono">
-                  • SPI: NSS(10) RST(14) DIO0(2)
-                </text>
-
-                {/* Stage Radar / Ultrasonic Module */}
-                <rect
-                  x="25"
-                  y="165"
-                  width="195"
-                  height="95"
-                  fill="#111318"
-                  stroke={activeFault === "debris_echo" ? "#ff2a2a" : "#ff4d00"}
-                  strokeWidth="2"
-                />
-                <text x="38" y="190" fill="#ff4d00" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
-                  MOD_02 // STAGE RADAR/SONAR
-                </text>
-                <text x="38" y="210" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  JSN-SR04T / 24GHz FMCW
-                </text>
-                <text x="38" y="228" fill="#88857e" fontSize="10" fontFamily="IBM Plex Mono">
-                  TRIG → GPIO4 | ECHO → GPIO5
-                </text>
-                <text x="38" y="246" fill="#00e676" fontSize="10" fontFamily="IBM Plex Mono">
-                  h = H_datum - (c · t_us)/2
-                </text>
-
-                {/* Hyetograph & Soil Moisture Array */}
-                <rect
-                  x="25"
-                  y="285"
-                  width="195"
-                  height="90"
-                  fill="#111318"
-                  stroke="#00e676"
-                  strokeWidth="1.8"
-                />
-                <text x="38" y="308" fill="#00e676" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
-                  MOD_04 // RAIN &amp; SOIL ARRAY
-                </text>
-                <text x="38" y="328" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  0.2mm/tip Reed ISR → GPIO19
-                </text>
-                <text x="38" y="346" fill="#88857e" fontSize="10" fontFamily="IBM Plex Mono">
-                  Capacitive Probe → GPIO34 ADC
-                </text>
-                <text x="38" y="364" fill="#ffb300" fontSize="10" fontFamily="IBM Plex Mono">
-                  Runoff Factor C_r ∈ [1.0, 1.6]
-                </text>
-
-                {/* SX1276 865MHz LoRaWAN Module */}
-                <rect
-                  x="535"
-                  y="55"
-                  width="200"
-                  height="120"
-                  fill="#111318"
-                  stroke={
-                    activeFault === "cellular_blackout" || activeFault === "lora_airtime"
-                      ? "#ffb300"
-                      : "#00e676"
-                  }
-                  strokeWidth="2"
-                />
-                <text x="548" y="80" fill="#ffb300" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
-                  MOD_03 // SX1276 865MHz LORA
-                </text>
-                <text x="548" y="100" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  Link Budget: 168 dB · +20 dBm
-                </text>
-                <text x="548" y="118" fill="#88857e" fontSize="10" fontFamily="IBM Plex Mono">
-                  SPI Bus: GPIO10 / 14 / 2
-                </text>
-                <text x="548" y="136" fill="#00e676" fontSize="10" fontFamily="IBM Plex Mono">
-                  P2P Mesh Failover &lt; 200ms
-                </text>
-                <text x="548" y="154" fill="#ff4d00" fontSize="10" fontFamily="IBM Plex Mono">
-                  ADR SF9 · TDMA Slotted
-                </text>
-
-                {/* Acoustic Siren & CAP Gateway */}
-                <rect
-                  x="535"
-                  y="220"
-                  width="200"
-                  height="120"
-                  fill="#111318"
-                  stroke="#ff4d00"
-                  strokeWidth="1.8"
-                />
-                <text x="548" y="245" fill="#ff4d00" fontSize="11" fontWeight="bold" fontFamily="IBM Plex Mono">
-                  MOD_06 // SIREN &amp; CAP GATEWAY
-                </text>
-                <text x="548" y="265" fill="#f2efe9" fontSize="10" fontFamily="IBM Plex Mono">
-                  Opto-Relay GPIO21 → 115dB Horn
-                </text>
-                <text x="548" y="283" fill="#88857e" fontSize="10" fontFamily="IBM Plex Mono">
-                  4G-LTE SIM7600 MQTT TLS
-                </text>
-                <text x="548" y="301" fill="#00e676" fontSize="10" fontFamily="IBM Plex Mono">
-                  ITU-T CAP v1.2 + Telegram API
-                </text>
-
-                {/* Interconnect Bus Lines */}
-                <line x1="220" y1="78" x2="275" y2="145" stroke="#ffb300" strokeWidth="2" />
-                <line x1="220" y1="210" x2="275" y2="200" stroke="#ff4d00" strokeWidth="2" />
-                <line x1="220" y1="330" x2="275" y2="255" stroke="#00e676" strokeWidth="2" />
-                <line x1="485" y1="165" x2="535" y2="115" stroke="#ffb300" strokeWidth="2" />
-                <line x1="485" y1="235" x2="535" y2="275" stroke="#ff4d00" strokeWidth="2" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Right 5 Cols: Interactive Fault Injector & Diagnosis */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
               <div className="panel-header">
@@ -319,12 +137,14 @@ export default function NetworkPage() {
               </div>
 
               <div className="p-4 space-y-2 border-b border-[#222220]">
-                {(Object.keys(NODE_FAULTS) as FaultType[]).map((fKey) => {
+                {(Object.keys(NODE_FAULTS) as NodeFaultType[]).map((fKey) => {
                   const item = NODE_FAULTS[fKey];
                   const active = activeFault === fKey;
                   return (
                     <button
                       key={fKey}
+                      type="button"
+                      aria-pressed={active}
                       onClick={() => setActiveFault(fKey)}
                       className={`w-full p-2.5 text-left font-mono text-xs border cursor-pointer transition flex items-center justify-between ${
                         active
@@ -367,9 +187,7 @@ export default function NetworkPage() {
           </div>
         </section>
 
-        {/* 6 Subsystems Detailed Spec + Full Production Sketch */}
         <section className="grid grid-cols-1 lg:grid-cols-12 border border-[#222220] bg-[#0e0e0e]">
-          {/* Left 5 Cols: Subsystem Selector */}
           <div className="lg:col-span-5 border-b lg:border-b-0 lg:border-r border-[#222220]">
             <div className="panel-header">
               <span>6 EDGE STATION SUBSYSTEM SPECIFICATIONS</span>
@@ -380,9 +198,13 @@ export default function NetworkPage() {
               {HARDWARE_MODULES.map((m) => (
                 <button
                   key={m.id}
+                  type="button"
+                  aria-pressed={selectedId === m.id}
                   onClick={() => setSelectedId(m.id)}
                   className={`w-full p-4 text-left cursor-pointer transition block ${
-                    selectedId === m.id ? "bg-[#151515] border-l-4 border-l-[#ff4d00]" : "hover:bg-[#121212]"
+                    selectedId === m.id
+                      ? "bg-[#151515] border-l-4 border-l-[#ff4d00]"
+                      : "hover:bg-[#121212]"
                   }`}
                 >
                   <div className="font-mono text-xs font-bold text-[#f2efe9]">
@@ -395,7 +217,7 @@ export default function NetworkPage() {
             </div>
 
             <div className="p-4 bg-[#080808] border-t border-[#222220] space-y-2 font-mono text-xs">
-              <div className="text-[#ff4d00] font-bold">{activeModule.name}</div>
+              <h2 className="text-[#ff4d00] font-bold">{activeModule.name}</h2>
               <ul className="space-y-1.5 text-[11px] text-[#88857e] list-disc list-inside">
                 {activeModule.specs.map((sp) => (
                   <li key={sp}>{sp}</li>
@@ -404,28 +226,36 @@ export default function NetworkPage() {
             </div>
           </div>
 
-          {/* Right 7 Cols: Complete Production ESP32-S3 Firmware Code */}
           <div className="lg:col-span-7 bg-[#080808] flex flex-col justify-between min-w-0">
             <div>
               <div className="panel-header">
                 <span>PRODUCTION SKETCH // AegisFlood_ESP32S3_Edge_Kalman_Node.ino</span>
                 <button
+                  type="button"
                   onClick={handleCopyCode}
                   className="text-[#ff4d00] hover:underline font-bold cursor-pointer"
                 >
-                  {copied ? "✓ COPIED" : "COPY FULL SKETCH"}
+                  {copied ? "COPIED" : "COPY FULL SKETCH"}
                 </button>
               </div>
               <div className="p-4">
-                <pre className="p-4 bg-[#0e0e0e] border border-[#222220] font-mono text-[11px] text-[#f2efe9] overflow-x-auto max-h-[520px] custom-scrollbar leading-relaxed">
+                <pre
+                  tabIndex={0}
+                  className="p-4 bg-[#0e0e0e] border border-[#222220] font-mono text-[11px] text-[#f2efe9] overflow-x-auto max-h-[520px] custom-scrollbar leading-relaxed"
+                >
                   {FULL_ESP32_SKETCH}
                 </pre>
               </div>
             </div>
 
             <div className="p-4 border-t border-[#222220] bg-[#0b0b0b] flex flex-wrap items-center justify-between gap-3">
-              <button onClick={handleDownloadIno} className="brutal-btn brutal-btn-primary">
-                ⬇ DOWNLOAD .INO FILE
+              <button
+                type="button"
+                onClick={handleDownloadIno}
+                className="brutal-btn brutal-btn-primary"
+              >
+                <Download className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+                DOWNLOAD .INO FILE
               </button>
               <Link href="/how-it-works" className="brutal-btn">
                 MATHEMATICAL DERIVATIONS →

@@ -1,124 +1,21 @@
-"use client";
-
-import React, { useState } from "react";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
+import { QuickstartPanel } from "@/components/features/quickstart-panel";
 import Footer from "@/components/footer";
-import {
-  EWS_STAGES,
-  FULL_ESP32_SKETCH,
-  HARDWARE_MODULES,
-  TWELVE_STEPS,
-} from "@/lib/aegisflood-data";
-
-const QUICKSTART_TABS = {
-  sketch: {
-    label: "ESP32-S3 KALMAN .INO",
-    code: `// Flash to ESP32-S3 Edge Node (240 MHz Xtensa LX7 + FPU)
-// JSN-SR04T/Radar: GPIO4/5 | Rain ISR: GPIO19 | SX1276 LoRa: SPI (865 MHz)
-float stepEdgeKalman(float rawStageM, bool &anomalyRejected, float &residualM) {
-  residualM = fabs(rawStageM - kf.x);
-  anomalyRejected = (residualM > 0.45f); // 3.8σ Innovation Gate (Debris Reject)
-  kf.p = kf.p + 0.008f;                  // Prior covariance update
-  float effectiveR = anomalyRejected ? (0.080f * 65.0f) : 0.080f;
-  kf.k = kf.p / (kf.p + effectiveR);
-  kf.x = kf.x + kf.k * (rawStageM - kf.x);
-  kf.p = (1.0f - kf.k) * kf.p;
-  return kf.x;
-}`,
-  },
-  pinout: {
-    label: "NODE PINOUT & BUS",
-    code: `# AEGISFLOOD EDGE STATION INTERCONNECT & SURGE ISOLATION TOPOLOGY
-STAGE RADAR/SONAR ->  VCC: 5.0V | TRIG: GPIO4  | ECHO: GPIO5   | GND: Star GND
-HYETOGRAPH RAIN   ->  REED_ISR: GPIO19 (0.2mm/tip)             | Debounce: 15ms RC
-SOIL CAPACITIVE   ->  EXCITE: 3.3V | SIG: GPIO34 (ADC1_CH6)    | Range: 0–100% θ_v
-SX1276 LORA 865   ->  NSS: GPIO10 | RST: GPIO14 | DIO0: GPIO2  | SPI: SCK/MISO/MOSI
-POWER SUBSYSTEM   ->  20W Solar -> MPPT -> 6.4V 6Ah LiFePO4 -> 5V/3.3V Buck + TVS`,
-  },
-  webapp: {
-    label: "DIGITAL TWIN CLI",
-    code: `# Run the AegisFlood 5-Node River Basin Digital Twin & Telemetry Workbench
-git clone https://github.com/tanisheesh/AegisFlood.git
-cd AegisFlood
-npm install
-npm run dev
-
-# Open http://localhost:3000 -> /playground (Basin Twin) or /network (Node Spec)`,
-  },
-};
-
-const BENCHMARK_ROWS = [
-  {
-    arch: "MECHANICAL FLOAT SWITCH",
-    sensing: "Single Binary Contact",
-    debrisImmunity: "JAMS ON SILT / FLOATING LOGS",
-    leadTime: "0 MIN (REACTIVE ONLY)",
-    evacuation: "Static Siren Only",
-    backhaul: "Wired / Local",
-    win: false,
-  },
-  {
-    arch: "RAW ULTRASONIC + BUZZER",
-    sensing: "Unfiltered HC-SR04 / JSN-SR04T",
-    debrisImmunity: "FALSE SIRENS ON SURFACE DEBRIS",
-    leadTime: "0 MIN (THRESHOLD ONLY)",
-    evacuation: "None",
-    backhaul: "Wi-Fi (Fails in Storm)",
-    win: false,
-  },
-  {
-    arch: "CLOUD-ONLY 4G GAUGE",
-    sensing: "Periodic 15-Min Polling",
-    debrisImmunity: "Delayed Moving Average",
-    leadTime: "10–15 MIN LAG",
-    evacuation: "Fixed Map PDF",
-    backhaul: "4G Only (Blackout Prone)",
-    win: false,
-  },
-  {
-    arch: "AEGISFLOOD (EDGE-KALMAN + MESH)",
-    sensing: "5-Node Radar + Rain + Soil Fusion",
-    debrisImmunity: "1D KALMAN 3.8σ INNOVATION GATE",
-    leadTime: "+15m TO +120m KINEMATIC WAVE",
-    evacuation: "DYNAMIC DIJKSTRA G(V,E)",
-    backhaul: "4G-MQTT + 865MHz LORA MESH",
-    win: true,
-  },
-];
+import Navbar from "@/components/navbar";
+import { EWS_STAGES, HARDWARE_MODULES, TWELVE_STEPS } from "@/lib/aegisflood-data";
+import { BENCHMARK_ROWS, HERO_STATION_SNAPSHOT, LANDING_KPIS } from "@/lib/landing-spec";
 
 export default function LandingPage() {
-  const [activeTab, setActiveTab] = useState<"sketch" | "pinout" | "webapp">("sketch");
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(QUICKSTART_TABS[activeTab].code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1600);
-  };
-
-  const handleDownloadIno = () => {
-    const blob = new Blob([FULL_ESP32_SKETCH], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "AegisFlood_ESP32S3_Edge_Kalman_Node.ino";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       <Navbar />
 
       <main className="flex-1 max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8">
-        {/* ================= HERO GRID ================= */}
         <section className="grid grid-cols-1 lg:grid-cols-12 border-x border-b border-[#222220]">
-          {/* Left 7 Cols */}
           <div className="lg:col-span-7 p-5 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[#222220] flex flex-col justify-between min-w-0">
             <div>
               <div className="inline-flex items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.18em] text-[#ff4d00] mb-4 sm:mb-6">
-                <span className="w-2 h-2 shrink-0 bg-[#ff4d00] inline-block" />
+                <span className="w-2 h-2 shrink-0 bg-[#ff4d00] inline-block" aria-hidden="true" />
                 <span>ESP32-S3 // 1D KALMAN GATE // SAINT-VENANT WAVE // SX1276 865MHZ LORA</span>
               </div>
 
@@ -131,9 +28,9 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-sm sm:text-base lg:text-lg text-[#88857e] max-w-xl leading-relaxed mb-6 sm:mb-8">
-                Single-point threshold gauges trigger only after downstream embankments breach, while
-                floating logs and storm debris cause rampant false alarms on raw ultrasonic sensors.{" "}
-                <strong className="text-[#f2efe9] font-semibold">AegisFlood</strong> is a{" "}
+                Single-point threshold gauges trigger only after downstream embankments breach,
+                while floating logs and storm debris cause rampant false alarms on raw ultrasonic
+                sensors. <strong className="text-[#f2efe9] font-semibold">AegisFlood</strong> is a{" "}
                 <strong className="text-[#f2efe9] font-semibold">
                   5-Node River Basin Hydrological Digital Twin
                 </strong>{" "}
@@ -147,7 +44,8 @@ export default function LandingPage() {
                 <strong className="text-[#f2efe9] font-semibold">
                   dynamic Dijkstra evacuation routing
                 </strong>
-                , and automatic <code className="text-[#ffb300]">865 MHz LoRaWAN mesh failover</code>.
+                , and automatic{" "}
+                <code className="text-[#ffb300]">865 MHz LoRaWAN mesh failover</code>.
               </p>
             </div>
 
@@ -164,49 +62,15 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Right 5 Cols: Live 5-Node Basin Telemetry Snapshot */}
           <div className="lg:col-span-5 bg-[#0b0b0b] flex flex-col justify-between min-w-0">
             <div className="panel-header">
-              <span>HYDRO_MESH_BUS // 5-STATION RIVER BASIN STATUS</span>
-              <span className="text-[#00e676] font-bold">● KALMAN: 10Hz LOCK</span>
+              <span>HYDRO_MESH_BUS // 5-STATION RIVER BASIN BASELINE</span>
+              <span className="text-[#00e676] font-bold">KALMAN: 10Hz LOCK</span>
             </div>
 
-            <div className="p-4 sm:p-6 space-y-4 font-mono text-xs">
+            <div className="p-4 sm:p-6 space-y-4 font-mono text-xs tabular-nums">
               <div className="space-y-2.5">
-                {[
-                  {
-                    id: "NODE_01 // DEVPRAYAG_GORGE",
-                    spec: "KM 0.0 · 830m ASL",
-                    val: 45,
-                    metric: "Stage: 3.40m / Danger: 6.40m",
-                    state: "HEADWATER",
-                    bar: "bg-[#ff4d00]",
-                  },
-                  {
-                    id: "NODE_02 // TAPOVAN_BARRAGE",
-                    spec: "KM 14.5 · 490m ASL",
-                    val: 44,
-                    metric: "Stage: 3.10m · Q: 295 m³/s",
-                    state: "SPILLWAY",
-                    bar: "bg-[#00e676]",
-                  },
-                  {
-                    id: "NODE_03 // RISHIKESH_BASIN",
-                    spec: "KM 28.0 · 340m ASL",
-                    val: 48,
-                    metric: "Kalman Δ: 0.01m · SF9 LoRa",
-                    state: "KALMAN_OK",
-                    bar: "bg-[#ff4d00]",
-                  },
-                  {
-                    id: "NODE_04 // HARIDWAR_PLAINS",
-                    spec: "KM 42.0 · 295m ASL",
-                    val: 52,
-                    metric: "Dijkstra G(V,E): 4 Zones Clear",
-                    state: "ROUTING_OK",
-                    bar: "bg-[#ffb300]",
-                  },
-                ].map((s) => (
+                {HERO_STATION_SNAPSHOT.map((s) => (
                   <div key={s.id} className="border border-[#222220] bg-[#111111] p-2.5 sm:p-3">
                     <div className="flex flex-wrap items-center justify-between gap-1 mb-1.5">
                       <div className="truncate">
@@ -232,8 +96,12 @@ export default function LandingPage() {
                 <div className="text-[10px] text-[#ff4d00] uppercase tracking-wider">
                   1D SAINT-VENANT CONTINUITY &amp; EDGE KALMAN GAIN
                 </div>
-                <div className="text-[#00e676] text-[11px] sm:text-xs overflow-x-auto custom-scrollbar whitespace-nowrap pb-1">
-                  ∂A/∂t + ∂Q/∂x = q_L &nbsp;|&nbsp; K_k = P_k⁻ / (P_k⁻ + R_eff) &nbsp;|&nbsp; x̂_k = x̂_k⁻ + K_k(z_k - x̂_k⁻)
+                <div
+                  tabIndex={0}
+                  className="text-[#00e676] text-[11px] sm:text-xs overflow-x-auto custom-scrollbar whitespace-nowrap pb-1"
+                >
+                  ∂A/∂t + ∂Q/∂x = q_L &nbsp;|&nbsp; K_k = P_k⁻ / (P_k⁻ + R_eff) &nbsp;|&nbsp; x̂_k =
+                  x̂_k⁻ + K_k(z_k - x̂_k⁻)
                 </div>
               </div>
             </div>
@@ -247,30 +115,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ================= 4-KPI METRICS STRIP ================= */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-x border-b border-[#222220] bg-[#0b0b0b]">
-          {[
-            {
-              num: "58.0 KM",
-              label: "5-NODE RIVER BASIN MESH",
-              sub: "Devprayag (830m) → Roorkee Delta (268m)",
-            },
-            {
-              num: "3.8σ GATE",
-              label: "1D KALMAN DEBRIS REJECTION",
-              sub: "Blocks +2.0m floating timber sonar spikes",
-            },
-            {
-              num: "+120 MIN",
-              label: "KINEMATIC WAVE LEAD TIME",
-              sub: "Manning Q + soil moisture runoff coupling",
-            },
-            {
-              num: "G(V, E)",
-              label: "DYNAMIC DIJKSTRA EVACUATION",
-              sub: "Prunes submerged bridges (w = ∞) in <2ms",
-            },
-          ].map((m, idx) => (
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-x border-b border-[#222220] bg-[#0b0b0b] tabular-nums">
+          {LANDING_KPIS.map((m, idx) => (
             <div
               key={m.label}
               className={`p-5 sm:p-6 border-[#222220] ${
@@ -290,11 +136,12 @@ export default function LandingPage() {
           ))}
         </section>
 
-        {/* ================= 4-STAGE AUTONOMOUS EARLY WARNING PIPELINE ================= */}
         <section className="border-x border-b border-[#222220] bg-[#0e0e0e]">
           <div className="panel-header">
             <span>DISTRIBUTED EARLY WARNING ARCHITECTURE // 4-STAGE DETERMINISTIC PIPELINE</span>
-            <span className="text-[#ff4d00]">SENSE → KALMAN FILTER → KINEMATIC FORECAST → DIJKSTRA DISPATCH</span>
+            <span className="text-[#ff4d00]">
+              SENSE → KALMAN FILTER → KINEMATIC FORECAST → DIJKSTRA DISPATCH
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-[#222220]">
@@ -310,9 +157,9 @@ export default function LandingPage() {
                     </span>
                     <span className="text-[#00e676]">{st.condition}</span>
                   </div>
-                  <h3 className="font-display font-black text-xl uppercase text-[#f2efe9]">
+                  <h2 className="font-display font-black text-xl uppercase text-[#f2efe9]">
                     {st.label}
-                  </h3>
+                  </h2>
                   <p className="text-xs text-[#88857e] leading-relaxed">{st.action}</p>
                 </div>
               </div>
@@ -320,11 +167,13 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ================= 12-STEP EXECUTION MATRIX ================= */}
         <section className="border-x border-b border-[#222220] bg-[#080808]">
           <div className="panel-header">
             <span>TELEMETRY &amp; EVACUATION EXECUTION PIPELINE // 12-STEP CYCLE</span>
-            <span>PHASE 1: EDGE SENSING &amp; KALMAN [01–06] · PHASE 2: WAVE FORECAST &amp; ROUTING [07–12]</span>
+            <span>
+              PHASE 1: EDGE SENSING &amp; KALMAN [01–06] · PHASE 2: WAVE FORECAST &amp; ROUTING
+              [07–12]
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 border-t border-[#222220]">
@@ -342,9 +191,9 @@ export default function LandingPage() {
                       {s.state}
                     </span>
                   </div>
-                  <h4 className="font-mono text-xs sm:text-sm font-bold text-[#f2efe9]">
+                  <h3 className="font-mono text-xs sm:text-sm font-bold text-[#f2efe9]">
                     {s.title}
-                  </h4>
+                  </h3>
                   <p className="text-xs text-[#88857e] leading-relaxed">{s.desc}</p>
                 </div>
                 <div className="pt-2 border-t border-[#222220] font-mono text-[10px] text-[#00e676]">
@@ -355,9 +204,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ================= 6 HARDWARE SUBSYSTEMS SUMMARY + QUICKSTART ================= */}
         <section className="grid grid-cols-1 lg:grid-cols-12 border-x border-b border-[#222220]">
-          {/* Left 6 Cols: Hardware Stack */}
           <div className="lg:col-span-6 border-b lg:border-b-0 lg:border-r border-[#222220] bg-[#0e0e0e] flex flex-col justify-between">
             <div className="panel-header">
               <span>EDGE SENSING &amp; TELECOM STACK // 6 SUBSYSTEMS</span>
@@ -384,61 +231,18 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Right 6 Cols: Interactive Firmware & CLI Quickstart */}
-          <div className="lg:col-span-6 bg-[#080808] flex flex-col justify-between min-w-0">
-            <div>
-              <div className="panel-header">
-                <span>PRODUCTION ARTIFACTS // FIRMWARE &amp; DIGITAL TWIN</span>
-                <button
-                  onClick={handleDownloadIno}
-                  className="text-[#ffb300] hover:underline font-bold cursor-pointer"
-                >
-                  ⬇ DOWNLOAD .INO SKETCH
-                </button>
-              </div>
-
-              <div className="flex border-b border-[#222220] bg-[#0e0e0e] overflow-x-auto">
-                {(Object.keys(QUICKSTART_TABS) as Array<keyof typeof QUICKSTART_TABS>).map((k) => (
-                  <button
-                    key={k}
-                    onClick={() => setActiveTab(k)}
-                    className={`px-4 py-2.5 font-mono text-[11px] tracking-wider border-r border-[#222220] cursor-pointer whitespace-nowrap ${
-                      activeTab === k
-                        ? "bg-[#151515] text-[#ff4d00] font-bold border-b-2 border-b-[#ff4d00]"
-                        : "text-[#88857e] hover:text-[#f2efe9]"
-                    }`}
-                  >
-                    {QUICKSTART_TABS[k].label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="p-4 sm:p-6">
-                <pre className="p-4 bg-[#0e0e0e] border border-[#222220] font-mono text-[11px] sm:text-xs text-[#f2efe9] overflow-x-auto leading-relaxed custom-scrollbar">
-                  {QUICKSTART_TABS[activeTab].code}
-                </pre>
-              </div>
-            </div>
-
-            <div className="p-4 sm:p-6 border-t border-[#222220] bg-[#0b0b0b] flex flex-wrap items-center justify-between gap-3">
-              <button onClick={handleCopy} className="brutal-btn">
-                {copied ? "✓ COPIED TO CLIPBOARD" : "COPY SNIPPET"}
-              </button>
-              <Link href="/playground" className="brutal-btn brutal-btn-primary">
-                OPEN INTERACTIVE BASIN TWIN →
-              </Link>
-            </div>
-          </div>
+          <QuickstartPanel />
         </section>
 
-        {/* ================= ARCHITECTURE COMPARISON BENCHMARK TABLE ================= */}
         <section className="border-x border-b border-[#222220] bg-[#0e0e0e]">
           <div className="panel-header">
-            <span>ARCHITECTURE COMPARISON // REACTIVE GAUGES VS. DISTRIBUTED EDGE-AI DIGITAL TWIN</span>
+            <span>
+              ARCHITECTURE COMPARISON // REACTIVE GAUGES VS. DISTRIBUTED EDGE-AI DIGITAL TWIN
+            </span>
             <span>EVALUATION ACROSS 5 CRITICAL DIMENSIONS</span>
           </div>
 
-          <div className="overflow-x-auto custom-scrollbar">
+          <div tabIndex={0} className="overflow-x-auto custom-scrollbar">
             <table className="w-full min-w-[680px] text-left border-collapse font-mono text-xs">
               <thead>
                 <tr className="border-b border-[#222220] bg-[#0b0b0b] text-[#88857e] text-[10px] sm:text-[11px] uppercase">

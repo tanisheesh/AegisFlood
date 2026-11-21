@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import Navbar from "@/components/navbar";
 
 const MATHEMATICAL_LAWS = [
   {
@@ -29,7 +28,8 @@ const MATHEMATICAL_LAWS = [
   {
     code: "LAW 04 // WAVE PROPAGATION",
     title: "1D SAINT-VENANT CONTINUITY & KINEMATIC WAVE CELERITY",
-    formula: "∂A/∂t + ∂Q/∂x = q_lateral   |   c_k = dQ/dA ≈ (5 / 3) · v_mean   |   Δt_lag = Δx / c_k",
+    formula:
+      "∂A/∂t + ∂Q/∂x = q_lateral   |   c_k = dQ/dA ≈ (5 / 3) · v_mean   |   Δt_lag = Δx / c_k",
     desc: "Upstream cloudbursts and dam spillway releases propagate downstream at kinematic wave celerity c_k = (5/3)·v_mean with distance attenuation. Fusing upstream excess head with local dh/dt yields +15m, +30m, +60m, and +120m water stage forecasts.",
   },
   {
@@ -130,7 +130,10 @@ export default function HowItWorksPage() {
                   <span className="text-[#ff4d00] font-bold">{law.code}</span>
                   <span className="text-[#f2efe9] font-bold">{law.title}</span>
                 </div>
-                <div className="p-3.5 bg-[#080808] border border-[#222220] font-mono text-xs sm:text-sm text-[#00e676] overflow-x-auto custom-scrollbar">
+                <div
+                  tabIndex={0}
+                  className="p-3.5 bg-[#080808] border border-[#222220] font-mono text-xs sm:text-sm text-[#00e676] overflow-x-auto custom-scrollbar"
+                >
                   {law.formula}
                 </div>
                 <p className="text-xs sm:text-sm text-[#88857e] leading-relaxed">{law.desc}</p>
@@ -149,7 +152,7 @@ export default function HowItWorksPage() {
           <div className="divide-y divide-[#222220]">
             {ENGINEERING_QA.map((item) => (
               <div key={item.q} className="p-5 sm:p-6 space-y-2">
-                <h3 className="font-mono text-xs sm:text-sm font-bold text-[#f2efe9]">{item.q}</h3>
+                <h2 className="font-mono text-xs sm:text-sm font-bold text-[#f2efe9]">{item.q}</h2>
                 <p className="text-xs sm:text-sm text-[#88857e] leading-relaxed">{item.a}</p>
               </div>
             ))}
