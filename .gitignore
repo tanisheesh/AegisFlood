@@ -25,7 +25,9 @@
 brag-output/
 
 # testing
+coverage/
 playwright-report/
+test-results/
 
 # debug
 npm-debug.log*
