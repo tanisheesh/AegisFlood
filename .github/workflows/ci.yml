@@ -133,7 +133,7 @@ jobs:
       - if: steps.detect.outputs.pnpm == 'true' && steps.detect.outputs.pnpm_pkg_mgr != 'true'
         uses: pnpm/action-setup@v6
         with:
-          version: "10"
+          version: "12"
           cache: true
           cache_dependency_path: "**/pnpm-lock.yaml"
 
